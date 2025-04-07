@@ -1,0 +1,8 @@
+.vs/
+.vscode/
+Debug/
+Release/
+*.obj
+*.exe
+*.pdb
+*.user

@@ -1,0 +1,3 @@
+C:/Users/jordi/Documents/Projects/Powerup_Chess/out/build/x64-Debug/CMakeFiles/Powerup_Chess.dir
+C:/Users/jordi/Documents/Projects/Powerup_Chess/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/jordi/Documents/Projects/Powerup_Chess/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
