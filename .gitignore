@@ -1,8 +1,35 @@
-.vs/
-.vscode/
+# Build directories
+out/
+build/
 Debug/
 Release/
-*.obj
-*.exe
-*.pdb
+
+# vcpkg installed packages
+vcpkg_installed/
+
+# Visual Studio files
+.vs/
+.vscode/
 *.user
+*.suo
+*.VC.db
+*.VC.opendb
+*.pdb
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CTestTestfile.cmake
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Executables
+*.exe
+*.out
+*.app
