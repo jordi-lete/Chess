@@ -24,4 +24,8 @@ public:
 
 	bool init();
 
+	void renderBoard();
+
+	void render();
+
 };

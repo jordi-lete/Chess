@@ -55,3 +55,41 @@ void SDL_handler::cleanup()
 	SDL_Quit();
 
 }
+
+void SDL_handler::renderBoard()
+{
+
+	bool white = true; //First square rendered (top left) is white
+
+	float squareWidth = (float)SCREEN_WIDTH / 8.0f;
+	float squareHeight = (float)SCREEN_HEIGHT / 8.0f;
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+
+			white ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
+
+			SDL_FRect square = { i * squareWidth, j * squareHeight, squareWidth, squareHeight};
+
+			SDL_RenderFillRect(renderer, &square);
+
+			white = !white;
+
+		}
+		white = !white;
+	}
+
+}
+
+void SDL_handler::render()
+{
+	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+	SDL_RenderClear(renderer);
+
+	renderBoard();
+
+	SDL_RenderPresent(renderer);
+
+}

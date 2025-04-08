@@ -7,10 +7,11 @@ void Chess::run()
 
 	SDL_handler handler;
 
+	handler.render();
+
 	bool running = true;
 
-
-		// start an event loop
+	// start an event loop
 	while (running && SDL_WaitEvent(&handler.event)) 
 	{
 		std::cout << "Event: " << handler.event.type << std::endl;
@@ -25,8 +26,10 @@ void Chess::run()
 		{
 			
 		}
-		}
-	}
 
+		}
+
+		handler.render();
+	}
 
 }
