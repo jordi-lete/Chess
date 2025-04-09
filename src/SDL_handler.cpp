@@ -120,7 +120,7 @@ SDL_Texture* SDL_handler::loadImage(std::string imageFile)
 
 	if (!image)
 	{
-		printf("Could not load image: %s", imageFile);
+		printf("Could not load image: %s", imageFile.c_str());
 	}
 
 	SDL_Texture* pieceTexture = SDL_CreateTextureFromSurface(renderer, image);
