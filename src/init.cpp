@@ -1,13 +1,15 @@
 #include "init.h"
 #include "SDL_handler.h"
 #include <iostream>
+#include "BoardState.h"
 
 void Chess::run()
 {
+	Board board;
 
 	SDL_handler handler;
 
-	handler.render();
+	handler.render(board);
 
 	bool running = true;
 
@@ -29,7 +31,7 @@ void Chess::run()
 
 		}
 
-		handler.render();
+		handler.render(board);
 	}
 
 }

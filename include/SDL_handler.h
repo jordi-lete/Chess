@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <string>
+#include "BoardState.h"
 
 class SDL_handler
 {
@@ -41,6 +42,6 @@ public:
 
 	void renderPiece(SDL_Texture* piece, int file, int rank);
 
-	void render();
+	void render(const Board &board);
 
 };

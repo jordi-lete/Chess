@@ -74,19 +74,20 @@ void SDL_handler::cleanup()
 
 void SDL_handler::loadPieceTextures()
 {
-	whitePawn = loadImage("assets/Chess_plt45.svg");
-	whiteRook = loadImage("assets/Chess_rlt45.svg");
-	whiteKnight = loadImage("assets/Chess_nlt45.svg");
-	whiteBishop = loadImage("assets/Chess_blt45.svg");
-	whiteQueen = loadImage("assets/Chess_qlt45.svg");
-	whiteKing = loadImage("assets/Chess_klt45.svg");
+	std::string basePath = SDL_GetBasePath(); // Get the application directory
+	whitePawn = loadImage("assets/white_pawn.png");
+	whiteRook = loadImage("assets/white_rook.png");
+	whiteKnight = loadImage("assets/white_knight.png");
+	whiteBishop = loadImage("assets/white_bishop.png");
+	whiteQueen = loadImage("assets/white_queen.png");
+	whiteKing = loadImage("assets/white_king.png");
 
-	blackPawn = loadImage("assets/Chess_pdt45.svg");
-	blackRook = loadImage("assets/Chess_rdt45.svg");
-	blackKnight = loadImage("assets/Chess_ndt45.svg");
-	blackBishop = loadImage("assets/Chess_bdt45.svg");
-	blackQueen = loadImage("assets/Chess_qdt45.svg");
-	blackKing = loadImage("assets/Chess_kdt45.svg");
+	blackPawn = loadImage("assets/black_pawn.png");
+	blackRook = loadImage("assets/black_rook.png");
+	blackKnight = loadImage("assets/black_knight.png");
+	blackBishop = loadImage("assets/black_bishop.png");
+	blackQueen = loadImage("assets/black_queen.png");
+	blackKing = loadImage("assets/black_king.png");
 }
 
 void SDL_handler::renderBoard()
@@ -125,6 +126,8 @@ SDL_Texture* SDL_handler::loadImage(std::string imageFile)
 
 	SDL_Texture* pieceTexture = SDL_CreateTextureFromSurface(renderer, image);
 
+	SDL_DestroySurface(image);
+
 	return pieceTexture;
 
 }
@@ -138,12 +141,83 @@ void SDL_handler::renderPiece(SDL_Texture* piece, int file, int rank)
 
 }
 
-void SDL_handler::render()
+void SDL_handler::render(const Board& board)
 {
 	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
 	SDL_RenderClear(renderer);
 
 	renderBoard();
+
+	for (int file = 0; file < 8; file++)
+	{
+		for (int rank = 0; rank < 8; rank++)
+		{
+			Board::PieceType piece = board.getPieceAt(file, rank);
+			switch (piece)
+			{
+			case Board::WHITE_PAWN:
+			{
+				renderPiece(whitePawn, file, rank);
+				break;
+			}
+			case Board::WHITE_KNIGHT:
+			{
+				renderPiece(whiteKnight, file, rank);
+				break;
+			}
+			case Board::WHITE_BISHOP:
+			{
+				renderPiece(whiteBishop, file, rank);
+				break;
+			}
+			case Board::WHITE_ROOK:
+			{
+				renderPiece(whiteRook, file, rank);
+				break;
+			}
+			case Board::WHITE_QUEEN:
+			{
+				renderPiece(whiteQueen, file, rank);
+				break;
+			}
+			case Board::WHITE_KING:
+			{
+				renderPiece(whiteKing, file, rank);
+				break;
+			}
+			case Board::BLACK_PAWN:
+			{
+				renderPiece(blackPawn, file, rank);
+				break;
+			}
+			case Board::BLACK_KNIGHT:
+			{
+				renderPiece(blackKnight, file, rank);
+				break;
+			}
+			case Board::BLACK_BISHOP:
+			{
+				renderPiece(blackBishop, file, rank);
+				break;
+			}
+			case Board::BLACK_ROOK:
+			{
+				renderPiece(blackRook, file, rank);
+				break;
+			}
+			case Board::BLACK_QUEEN:
+			{
+				renderPiece(blackQueen, file, rank);
+				break;
+			}
+			case Board::BLACK_KING:
+			{
+				renderPiece(blackKing, file, rank);
+				break;
+			}
+			}
+		}
+	}
 
 	SDL_RenderPresent(renderer);
 

@@ -10,12 +10,14 @@ set(SOURCES
     src/Main.cpp
     src/init.cpp
     src/SDL_handler.cpp
+    src/BoardState.cpp
 )
 
 # Headers
 set(HEADERS
     include/init.h
     include/SDL_handler.h
+    include/BoardState.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -25,6 +27,8 @@ add_executable(Powerup_Chess ${SOURCES} ${HEADERS})
 
 # Add this before find_package
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/Users/jordi/Documents/Projects/Powerup_Chess/vcpkg_installed/x64-windows")
+
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 # Find and link SDL3
 find_package(SDL3 CONFIG REQUIRED)
