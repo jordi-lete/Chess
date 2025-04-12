@@ -1,5 +1,12 @@
 #pragma once
 
+struct Square
+{
+	int file;
+	int rank;
+	Square() : file(0), rank(0) {}
+};
+
 class Board
 {
 public:

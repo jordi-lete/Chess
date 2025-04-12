@@ -44,4 +44,6 @@ public:
 
 	void render(const Board &board);
 
+	Square snapToBoard(int pixelX, int pixelY);
+
 };

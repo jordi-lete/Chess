@@ -220,5 +220,14 @@ void SDL_handler::render(const Board& board)
 	}
 
 	SDL_RenderPresent(renderer);
+}
 
+Square SDL_handler::snapToBoard(int pixelX, int pixelY)
+{
+	Square square;
+
+	square.file = pixelX / squareWidth;
+	square.rank = pixelY / squareHeight;
+
+	return square;
 }
