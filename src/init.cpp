@@ -2,20 +2,21 @@
 #include "SDL_handler.h"
 #include <iostream>
 #include "BoardState.h"
+#include "GameState.h"
 
 void Chess::run()
 {
 	Board board;
-
+	GameState game;
 	SDL_handler handler;
 
 	handler.render(board);
 
 	bool running = true;
+	bool isWhiteTurn = true;
+	bool isWhitePiece = true;
 	int xStart = -1;
 	int yStart = -1;
-	int xEnd = -1;
-	int yEnd = -1;
 	Board::PieceType clickedPiece = board.NONE;
 	Square clickedSquare;
 	Square placeSquare;
@@ -36,17 +37,14 @@ void Chess::run()
 			xStart = handler.event.button.x;
 			yStart = handler.event.button.y;
 			clickedSquare = handler.snapToBoard(xStart, yStart);
-			clickedPiece = board.getPieceAt(clickedSquare.file, clickedSquare.rank);
-			std::cout << "Piece clicked was: " << clickedPiece << std::endl;
 			break;
 		}
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
-			xEnd = handler.event.button.x;
-			yEnd = handler.event.button.y;
+			int xEnd = handler.event.button.x;
+			int yEnd = handler.event.button.y;
 			placeSquare = handler.snapToBoard(xEnd, yEnd);
-			board.squares[placeSquare.file][placeSquare.rank] = clickedPiece;
-			board.squares[clickedSquare.file][clickedSquare.rank] = board.NONE;
+			game.tryMakeMove(board, clickedSquare.file, clickedSquare.rank, placeSquare.file, placeSquare.rank);
 			break;
 		}
 

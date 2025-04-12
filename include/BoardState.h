@@ -26,6 +26,9 @@ public:
 	{
 		return squares[file][rank];
 	}
+	
+	// returns true if white and false if black
+	bool getPieceColour(PieceType piece);
 
 private:
 	void setUpBoardStartPos();

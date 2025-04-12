@@ -42,3 +42,17 @@ void Board::setUpBoardStartPos()
 	}
 
 }
+
+bool Board::getPieceColour(PieceType piece)
+{
+
+	if (piece > 0 && piece < 7)
+	{
+		return true;
+	}
+	else if (piece >= 7)
+	{
+		return false;
+	}
+
+}
