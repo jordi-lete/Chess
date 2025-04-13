@@ -56,3 +56,15 @@ bool Board::getPieceColour(PieceType piece)
 	}
 
 }
+
+bool Board::isValidPosition(int file, int rank)
+{
+
+	if (file < 0 || file > 7 || rank < 0 || rank > 7)
+	{
+		return false;
+	}
+
+	return true;
+
+}

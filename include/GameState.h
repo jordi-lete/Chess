@@ -1,11 +1,13 @@
 #pragma once
 #include "BoardState.h"
+#include "Validator.h"
 
 class GameState
 {
 
 private:
 	bool m_isWhiteTurn;
+	Validator m_Validator;
 
 public:
 	// Constructor

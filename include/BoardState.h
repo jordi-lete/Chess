@@ -5,6 +5,7 @@ struct Square
 	int file;
 	int rank;
 	Square() : file(0), rank(0) {}
+	Square(int f, int r) : file(f), rank(r) {}
 };
 
 class Board
@@ -29,6 +30,8 @@ public:
 	
 	// returns true if white and false if black
 	bool getPieceColour(PieceType piece);
+
+	bool isValidPosition(int file, int rank);
 
 private:
 	void setUpBoardStartPos();

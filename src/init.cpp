@@ -15,9 +15,6 @@ void Chess::run()
 	bool running = true;
 	bool isWhiteTurn = true;
 	bool isWhitePiece = true;
-	int xStart = -1;
-	int yStart = -1;
-	Board::PieceType clickedPiece = board.NONE;
 	Square clickedSquare;
 	Square placeSquare;
 
@@ -34,8 +31,8 @@ void Chess::run()
 		}
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
-			xStart = handler.event.button.x;
-			yStart = handler.event.button.y;
+			int xStart = handler.event.button.x;
+			int yStart = handler.event.button.y;
 			clickedSquare = handler.snapToBoard(xStart, yStart);
 			break;
 		}
