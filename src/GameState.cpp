@@ -6,6 +6,7 @@ GameState::GameState()
 {
 
 	m_isWhiteTurn = true;
+	m_showMoves = false;
 
 }
 
@@ -26,12 +27,14 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	// Case when piece is clicked rather than dragged
 	if (startFile == endFile && startRank == endRank)
 	{
-		// ADD SOMETHING TO SHOW VALID MOVES
 		std::vector<Square> moves = validator->getPossibleMoves(board, startFile, startRank);
 		for (auto move : moves)
 		{
 			std::cout << "possible move: " << move.file << ", " << move.rank << std::endl;
 		}
+		//Store the moves in a variable to be accessed by the renderer
+		m_Moves = moves;
+		m_showMoves = true;
 		return false;
 	}
 
@@ -42,7 +45,19 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	board.squares[endFile][endRank] = piece;
 	board.squares[startFile][startRank] = board.NONE;
 	m_isWhiteTurn = !m_isWhiteTurn;
+	m_Moves.clear();
+	m_showMoves = false;
 	
 	return true;
 
+}
+
+const bool GameState::showMoves() const
+{
+	return m_showMoves;
+}
+
+const std::vector<Square>& GameState::getMoves() const 
+{
+	return m_Moves;
 }

@@ -3,12 +3,15 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 #include "BoardState.h"
+#include "GameState.h"
+#include <vector>
 
 class SDL_handler
 {
 private:
 	SDL_Texture* whitePawn, * whiteRook, * whiteKnight, * whiteBishop, * whiteQueen, * whiteKing;
 	SDL_Texture* blackPawn, * blackRook, * blackKnight, * blackBishop, * blackQueen, * blackKing;
+	SDL_Texture* possibleMove;
 
 	void loadPieceTextures();
 
@@ -42,7 +45,9 @@ public:
 
 	void renderPiece(SDL_Texture* piece, int file, int rank);
 
-	void render(const Board &board);
+	void renderPossibleMoves(std::vector<Square> moves);
+
+	void render(const Board &board, const GameState &game);
 
 	Square snapToBoard(int pixelX, int pixelY);
 

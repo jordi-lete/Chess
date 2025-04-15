@@ -1,6 +1,5 @@
 #include "init.h"
 #include "SDL_handler.h"
-#include <iostream>
 #include "BoardState.h"
 #include "GameState.h"
 
@@ -10,18 +9,15 @@ void Chess::run()
 	GameState game;
 	SDL_handler handler;
 
-	handler.render(board);
+	handler.render(board, game);
 
 	bool running = true;
-	bool isWhiteTurn = true;
-	bool isWhitePiece = true;
 	Square clickedSquare;
 	Square placeSquare;
 
 	// start an event loop
 	while (running && SDL_WaitEvent(&handler.event)) 
 	{
-		//std::cout << "Event: " << handler.event.type << std::endl;
 		switch (handler.event.type)
 		{
 		case SDL_EVENT_QUIT:
@@ -47,7 +43,7 @@ void Chess::run()
 
 		}
 
-		handler.render(board);
+		handler.render(board, game);
 	}
 
 }

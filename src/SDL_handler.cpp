@@ -65,6 +65,8 @@ void SDL_handler::cleanup()
 	SDL_DestroyTexture(blackQueen);
 	SDL_DestroyTexture(blackKing);
 
+	SDL_DestroyTexture(possibleMove);
+
 	SDL_DestroySurface(screenSurface);
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
@@ -88,6 +90,8 @@ void SDL_handler::loadPieceTextures()
 	blackBishop = loadImage("assets/black_bishop.png");
 	blackQueen = loadImage("assets/black_queen.png");
 	blackKing = loadImage("assets/black_king.png");
+
+	possibleMove = loadImage("assets/circle_tp.png");
 }
 
 void SDL_handler::renderBoard()
@@ -141,13 +145,31 @@ void SDL_handler::renderPiece(SDL_Texture* piece, int file, int rank)
 
 }
 
-void SDL_handler::render(const Board& board)
+void SDL_handler::renderPossibleMoves(std::vector<Square> moves)
+{
+
+	for (auto& move : moves)
+	{
+		float xPixel = (move.file + 0.4) * squareWidth;
+		float yPixel = (move.rank + 0.4) * squareHeight;
+		SDL_FRect dest = { xPixel, yPixel, squareWidth / 5, squareHeight / 5 };
+		SDL_RenderTexture(renderer, possibleMove, NULL, &dest);
+	}
+
+}
+
+void SDL_handler::render(const Board& board, const GameState& game)
 {
 	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
 	SDL_RenderClear(renderer);
 
 	renderBoard();
 
+	if (game.showMoves())
+	{
+		renderPossibleMoves(game.getMoves());
+	}
+		
 	for (int file = 0; file < 8; file++)
 	{
 		for (int rank = 0; rank < 8; rank++)
