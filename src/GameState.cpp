@@ -18,6 +18,8 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn) 
 	{
 		// PLAY A SOUND OR DISPLAY ALERT?
+		m_showMoves = false;
+		m_Moves.clear();
 		return false;
 	}
 
@@ -52,7 +54,8 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 			return true;
 		}
 	}
-	
+	m_Moves.clear();
+	m_showMoves = false;
 	return false;
 
 }
@@ -65,6 +68,8 @@ void GameState::getPossibleMoves(Board& board, int startFile, int startRank)
 	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn)
 	{
 		// PLAY A SOUND OR DISPLAY ALERT?
+		m_Moves.clear();
+		m_showMoves = false;
 		return;
 	}
 

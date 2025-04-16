@@ -14,6 +14,8 @@ void Chess::run()
 	bool running = true;
 	Square clickedSquare;
 	Square placeSquare;
+	Square lastClick;
+	bool useLastClick = false;
 
 	// start an event loop
 	while (running && SDL_WaitEvent(&handler.event)) 
@@ -38,7 +40,24 @@ void Chess::run()
 			int xEnd = handler.event.button.x;
 			int yEnd = handler.event.button.y;
 			placeSquare = handler.snapToBoard(xEnd, yEnd);
-			game.tryMakeMove(board, clickedSquare.file, clickedSquare.rank, placeSquare.file, placeSquare.rank);
+			if (clickedSquare.file == placeSquare.file && clickedSquare.rank == placeSquare.rank)
+			{
+				if (!useLastClick)
+				{
+					useLastClick = true;
+					lastClick = clickedSquare;
+				}
+				else
+				{
+					game.tryMakeMove(board, lastClick.file, lastClick.rank, placeSquare.file, placeSquare.rank);
+					useLastClick = false;
+				}
+			}
+			else
+			{
+				game.tryMakeMove(board, clickedSquare.file, clickedSquare.rank, placeSquare.file, placeSquare.rank);
+				useLastClick = false;
+			}
 			break;
 		}
 		}
