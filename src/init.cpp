@@ -30,6 +30,7 @@ void Chess::run()
 			int xStart = handler.event.button.x;
 			int yStart = handler.event.button.y;
 			clickedSquare = handler.snapToBoard(xStart, yStart);
+			game.getPossibleMoves(board, clickedSquare.file, clickedSquare.rank);
 			break;
 		}
 		case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -40,7 +41,6 @@ void Chess::run()
 			game.tryMakeMove(board, clickedSquare.file, clickedSquare.rank, placeSquare.file, placeSquare.rank);
 			break;
 		}
-
 		}
 
 		handler.render(board, game);

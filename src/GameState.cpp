@@ -38,17 +38,43 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 		return false;
 	}
 
-	//std::vector<Square> moves = validator->getPossibleMoves(board, startFile, startRank);
+	std::vector<Square> legalMoves = validator->getPossibleMoves(board, startFile, startRank);
 	
-	// ADD SOME isValidMove FUNCTION HERE
+	for (auto& move : legalMoves)
+	{
+		if (move.file == endFile && move.rank == endRank)
+		{
+			board.squares[endFile][endRank] = piece;
+			board.squares[startFile][startRank] = board.NONE;
+			m_isWhiteTurn = !m_isWhiteTurn;
+			m_Moves.clear();
+			m_showMoves = false;
+			return true;
+		}
+	}
+	
+	return false;
 
-	board.squares[endFile][endRank] = piece;
-	board.squares[startFile][startRank] = board.NONE;
-	m_isWhiteTurn = !m_isWhiteTurn;
-	m_Moves.clear();
-	m_showMoves = false;
-	
-	return true;
+}
+
+void GameState::getPossibleMoves(Board& board, int startFile, int startRank)
+{
+
+	Board::PieceType piece = board.getPieceAt(startFile, startRank);
+	// Check if it is the turn of the piece clicked
+	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn)
+	{
+		// PLAY A SOUND OR DISPLAY ALERT?
+		return;
+	}
+
+	// Find the correct set of methods for that piece
+	Piece* validator = m_Validator.getValidator(piece);
+	std::vector<Square> legalMoves = validator->getPossibleMoves(board, startFile, startRank);
+
+	//Store the moves in a variable to be accessed by the renderer
+	m_Moves = legalMoves;
+	m_showMoves = true;
 
 }
 

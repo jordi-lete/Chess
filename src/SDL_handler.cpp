@@ -164,11 +164,6 @@ void SDL_handler::render(const Board& board, const GameState& game)
 	SDL_RenderClear(renderer);
 
 	renderBoard();
-
-	if (game.showMoves())
-	{
-		renderPossibleMoves(game.getMoves());
-	}
 		
 	for (int file = 0; file < 8; file++)
 	{
@@ -239,6 +234,11 @@ void SDL_handler::render(const Board& board, const GameState& game)
 			}
 			}
 		}
+	}
+
+	if (game.showMoves())
+	{
+		renderPossibleMoves(game.getMoves());
 	}
 
 	SDL_RenderPresent(renderer);

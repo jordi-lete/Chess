@@ -17,6 +17,8 @@ public:
 
 	bool tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank);
 
+	void getPossibleMoves(Board& board, int startFile, int startRank);
+
 	const bool showMoves() const;
 
 	const std::vector<Square>& GameState::getMoves() const;
