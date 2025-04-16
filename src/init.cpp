@@ -40,14 +40,18 @@ void Chess::run()
 			int xEnd = handler.event.button.x;
 			int yEnd = handler.event.button.y;
 			placeSquare = handler.snapToBoard(xEnd, yEnd);
+			// Check if it is a click (rather than a drag)
 			if (clickedSquare.file == placeSquare.file && clickedSquare.rank == placeSquare.rank)
 			{
-				if (!useLastClick)
+				Board::PieceType clickedPiece = board.getPieceAt(clickedSquare.file, clickedSquare.rank);
+				bool isPlayerPiece = (clickedPiece != Board::NONE && board.getPieceColour(clickedPiece) == game.getCurrentTurn());
+				if (isPlayerPiece)
 				{
-					useLastClick = true;
 					lastClick = clickedSquare;
+					useLastClick = true;
+					game.getPossibleMoves(board, clickedSquare.file, clickedSquare.rank);
 				}
-				else
+				else if (useLastClick)
 				{
 					game.tryMakeMove(board, lastClick.file, lastClick.rank, placeSquare.file, placeSquare.rank);
 					useLastClick = false;

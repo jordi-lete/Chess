@@ -19,6 +19,8 @@ public:
 
 	void getPossibleMoves(Board& board, int startFile, int startRank);
 
+	bool getCurrentTurn();
+
 	const bool showMoves() const;
 
 	const std::vector<Square>& GameState::getMoves() const;

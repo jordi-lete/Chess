@@ -1,5 +1,4 @@
 #include "GameState.h"
-#include <iostream>
 
 // Constructor
 GameState::GameState()
@@ -26,20 +25,6 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	// Find the correct set of methods for that piece
 	Piece* validator = m_Validator.getValidator(piece);
 
-	// Case when piece is clicked rather than dragged
-	if (startFile == endFile && startRank == endRank)
-	{
-		std::vector<Square> moves = validator->getPossibleMoves(board, startFile, startRank);
-		for (auto move : moves)
-		{
-			std::cout << "possible move: " << move.file << ", " << move.rank << std::endl;
-		}
-		//Store the moves in a variable to be accessed by the renderer
-		m_Moves = moves;
-		m_showMoves = true;
-		return false;
-	}
-
 	std::vector<Square> legalMoves = validator->getPossibleMoves(board, startFile, startRank);
 	
 	for (auto& move : legalMoves)
@@ -56,6 +41,7 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	}
 	m_Moves.clear();
 	m_showMoves = false;
+	getPossibleMoves(board, endFile, endRank);
 	return false;
 
 }
@@ -81,6 +67,11 @@ void GameState::getPossibleMoves(Board& board, int startFile, int startRank)
 	m_Moves = legalMoves;
 	m_showMoves = true;
 
+}
+
+bool GameState::getCurrentTurn()
+{
+	return m_isWhiteTurn;
 }
 
 const bool GameState::showMoves() const
