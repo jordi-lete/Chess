@@ -12,6 +12,7 @@ Board::Board()
 		}
 	}
 	setUpBoardStartPos();
+	lastDoublePawnMove = { -1, -1 };
 }
 
 void Board::setUpBoardStartPos()

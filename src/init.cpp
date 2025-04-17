@@ -57,6 +57,7 @@ void Chess::run()
 					useLastClick = false;
 				}
 			}
+			// Otherwise it's a drag move
 			else
 			{
 				game.tryMakeMove(board, clickedSquare.file, clickedSquare.rank, placeSquare.file, placeSquare.rank);

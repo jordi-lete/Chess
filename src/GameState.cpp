@@ -31,6 +31,19 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	{
 		if (move.file == endFile && move.rank == endRank)
 		{
+			// Handle En Passant case first
+			board.lastDoublePawnMove = { -1, -1 };
+			// Check if the move was a double pawn push
+			if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && std::abs(startRank - endRank) == 2)
+			{
+				board.lastDoublePawnMove = { endFile, endRank };
+			}
+			// Now check if it was an En Passant capture
+			else if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endFile != startFile && board.squares[endFile][endRank] == board.NONE)
+			{
+				board.squares[endFile][startRank] = board.NONE;
+			}
+
 			board.squares[endFile][endRank] = piece;
 			board.squares[startFile][startRank] = board.NONE;
 			m_isWhiteTurn = !m_isWhiteTurn;

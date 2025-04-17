@@ -11,6 +11,8 @@ struct Square
 class Board
 {
 public:
+	Square lastDoublePawnMove;
+
 	// From 0 - 13
 	enum PieceType
 	{

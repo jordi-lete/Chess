@@ -39,8 +39,24 @@ std::vector<Square> Pawn::getPossibleMoves(Board& board, int file, int rank)
 		}
 	}
 
-	// EN-PASSANT
+	checkForEnPassant(board, file, rank, isWhite, moves);
 
 	return moves;
 
+}
+
+void Pawn::checkForEnPassant(Board& board, int file, int rank, bool isWhite, std::vector<Square>& moves)
+{
+	// if the last move was a double pawn move
+	if (board.lastDoublePawnMove.file >= 0)
+	{
+		int enPassantRank = isWhite ? 3 : 4;
+		// if the current pawn is on the capture rank and the target pawn is in the file next to it
+		if (rank == enPassantRank && std::abs(file - board.lastDoublePawnMove.file) == 1)
+		{
+			int captureDirection = isWhite ? -1 : 1;
+			// Update moves inplace
+			moves.push_back({board.lastDoublePawnMove.file, rank + captureDirection});
+		}
+	}
 }
