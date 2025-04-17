@@ -12,6 +12,12 @@ class Board
 {
 public:
 	Square lastDoublePawnMove;
+	bool blackKingMoved;
+	bool whiteKingMoved;
+	bool blackRookKSMoved;
+	bool whiteRookKSMoved;
+	bool blackRookQSMoved;
+	bool whiteRookQSMoved;
 
 	// From 0 - 13
 	enum PieceType

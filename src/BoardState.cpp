@@ -13,6 +13,12 @@ Board::Board()
 	}
 	setUpBoardStartPos();
 	lastDoublePawnMove = { -1, -1 };
+	blackKingMoved = false;
+	whiteKingMoved = false;
+	blackRookKSMoved = false;
+	whiteRookKSMoved = false;
+	blackRookQSMoved = false;
+	whiteRookQSMoved = false;
 }
 
 void Board::setUpBoardStartPos()

@@ -25,8 +25,53 @@ std::vector<Square> King::getPossibleMoves(Board& board, int file, int rank)
 		}
 	}
 
-	// ADD CASTLES
+	int castleRank = isWhite ? 7 : 0;
+	if (canCastle(board, isWhite, true)) // if can castle kingside
+	{
+		moves.push_back({ 6, castleRank });
+	}
+	if (canCastle(board, isWhite, false)) // if can castle queenside
+	{
+		moves.push_back({ 2, castleRank });
+	}
 
 	return moves;
+
+}
+
+bool King::canCastle(Board& board, bool isWhite, bool kingSide)
+{
+
+	if (isWhite && board.whiteKingMoved || !isWhite && board.blackKingMoved)
+	{
+		return false;
+	}
+
+	int rank = isWhite ? 7 : 0;
+
+	if (kingSide)
+	{
+		if (isWhite && board.whiteRookKSMoved || !isWhite && board.blackRookKSMoved)
+		{
+			return false;
+		}
+		if (board.squares[5][rank] != board.NONE || board.squares[6][rank] != board.NONE)
+		{
+			return false;
+		}
+	}
+
+	else // Queenside
+	{
+		if (isWhite && board.whiteRookQSMoved || !isWhite && board.blackRookQSMoved)
+		{
+			return false;
+		}
+		if (board.squares[3][rank] != board.NONE || board.squares[2][rank] != board.NONE || board.squares[1][rank] != board.NONE)
+		{
+			return false;
+		}
+	}
+	return true;
 
 }
