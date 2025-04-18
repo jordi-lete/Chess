@@ -25,7 +25,8 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	// Find the correct set of methods for that piece
 	Piece* validator = m_Validator.getValidator(piece);
 
-	std::vector<Square> legalMoves = validator->getPossibleMoves(board, startFile, startRank);
+	std::vector<Square> possibleMoves = validator->getPossibleMoves(board, startFile, startRank);
+	std::vector<Square> legalMoves = returnLegalMoves(board, possibleMoves, piece, startFile, startRank);
 	
 	for (auto& move : legalMoves)
 	{
@@ -65,12 +66,33 @@ void GameState::getPossibleMoves(Board& board, int startFile, int startRank)
 
 	// Find the correct set of methods for that piece
 	Piece* validator = m_Validator.getValidator(piece);
-	std::vector<Square> legalMoves = validator->getPossibleMoves(board, startFile, startRank);
-
+	std::vector<Square> possibleMoves = validator->getPossibleMoves(board, startFile, startRank);
+	std::vector<Square> legalMoves = returnLegalMoves(board, possibleMoves, piece, startFile, startRank);
+	
 	//Store the moves in a variable to be accessed by the renderer
 	m_Moves = legalMoves;
 	m_showMoves = true;
 
+}
+
+std::vector<Square> GameState::returnLegalMoves(Board& board, std::vector<Square> moves, Board::PieceType piece, int startFile, int startRank)
+{
+	std::vector<Square> legalMoves;
+
+	// If the move would leave the king in check it is not valid
+	for (auto& move : moves)
+	{
+		// Make the move on the fake board first
+		Board fakeBoard = board;
+		fakeBoard.squares[move.file][move.rank] = piece;
+		fakeBoard.squares[startFile][startRank] = board.NONE;
+		if (!isInCheck(fakeBoard))
+		{
+			legalMoves.push_back({ move.file, move.rank });
+		}
+	}
+
+	return legalMoves;
 }
 
 bool GameState::getCurrentTurn()
@@ -162,3 +184,48 @@ void GameState::handleCastling(Board& board, Board::PieceType piece, int startFi
 	}
 }
 
+bool GameState::isInCheck(Board& board)
+{
+	Board::PieceType king = m_isWhiteTurn ? board.WHITE_KING : board.BLACK_KING;
+	Square kingPos = { -1, -1 };
+	// iterate through each square on the board to find king	
+	for (int f = 0; f < 8; f++)
+	{
+		for (int r = 0; r < 8; r++)
+		{
+			if (board.getPieceAt(f, r) == king)
+			{
+				kingPos = { f, r };
+				break;
+			}
+		}
+		if (kingPos.file >= 0) { break; }
+	}
+
+	// Now we check if any of the opposition pieces are attacking the kingPos
+	for (int f = 0; f < 8; f++)
+	{
+		for (int r = 0; r < 8; r++)
+		{
+			Board::PieceType piece = board.getPieceAt(f, r);
+			if (piece == board.NONE || board.getPieceColour(piece) == m_isWhiteTurn)
+			{
+				continue;
+			}
+			else
+			{
+				Piece* validator = m_Validator.getValidator(piece);
+				std::vector<Square> pieceMoves = validator->getPossibleMoves(board, f, r);
+				for (auto& move : pieceMoves)
+				{
+					if (move.file == kingPos.file && move.rank == kingPos.rank)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	return false;
+}

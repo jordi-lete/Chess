@@ -19,6 +19,8 @@ public:
 
 	void getPossibleMoves(Board& board, int startFile, int startRank);
 
+	std::vector<Square> returnLegalMoves(Board& board, std::vector<Square> moves, Board::PieceType piece, int startFile, int startRank);
+
 	bool getCurrentTurn();
 
 	const bool showMoves() const;
