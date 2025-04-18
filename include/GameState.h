@@ -25,4 +25,10 @@ public:
 
 	const std::vector<Square>& GameState::getMoves() const;
 
+	void handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank);
+
+	void handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRAnk);
+
+	bool isInCheck(Board& board);
+
 };

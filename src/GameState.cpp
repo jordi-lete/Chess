@@ -31,73 +31,8 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	{
 		if (move.file == endFile && move.rank == endRank)
 		{
-			// Handle En Passant case first
-			board.lastDoublePawnMove = { -1, -1 };
-			// Check if the move was a double pawn push
-			if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && std::abs(startRank - endRank) == 2)
-			{
-				board.lastDoublePawnMove = { endFile, endRank };
-			}
-			// Now check if it was an En Passant capture
-			else if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endFile != startFile && board.squares[endFile][endRank] == board.NONE)
-			{
-				board.squares[endFile][startRank] = board.NONE;
-			}
-
-			// If rook or king moved, we can no longer castle
-			else if (piece == Board::WHITE_ROOK)
-			{
-				if (startFile == 0 && startRank == 7) { board.whiteRookQSMoved = true; }
-				if (startFile == 7 && startRank == 7) { board.whiteRookKSMoved = true; }
-			}
-			else if (piece == Board::BLACK_ROOK)
-			{
-				if (startFile == 0 && startRank == 0) { board.blackRookQSMoved = true; }
-				if (startFile == 7 && startRank == 0) { board.blackRookKSMoved = true; }
-			}
-			else if (piece == Board::WHITE_KING || piece == Board::BLACK_KING)
-			{
-				if (std::abs(startFile - endFile) == 2) // We are castling
-				{
-					if (endFile == 2) // Queenside
-					{
-						board.squares[3][endRank] = board.squares[0][endRank];
-						board.squares[0][endRank] = board.NONE;
-					}
-					else if (endFile == 6) // Kingside
-					{
-						board.squares[5][endRank] = board.squares[7][endRank];
-						board.squares[7][endRank] = board.NONE;
-					}
-				}
-				if (piece == Board::WHITE_KING) { board.whiteKingMoved = true; }
-				else { board.blackKingMoved = true; }
-			}
-
-			// Now check if either rook is captured
-			Board::PieceType targetPiece = board.getPieceAt(endFile, endRank);
-			if (targetPiece == Board::WHITE_ROOK)
-			{
-				if (endFile == 0 && endRank == 7)
-				{
-					board.whiteRookQSMoved = true;
-				}
-				else if (endFile == 7 && endRank == 7)
-				{
-					board.whiteRookKSMoved = true;
-				}
-			}
-			else if (targetPiece == Board::BLACK_ROOK)
-			{
-				if (endFile == 0 && endRank == 0)
-				{
-					board.blackRookQSMoved = true;
-				}
-				else if (endFile == 7 && endRank == 0)
-				{
-					board.blackRookKSMoved = true;
-				}
-			}
+			handleEnPassant(board, piece, startFile, startRank, endFile, endRank);
+			handleCastling(board, piece, startFile, startRank, endFile, endRank);
 
 			board.squares[endFile][endRank] = piece;
 			board.squares[startFile][startRank] = board.NONE;
@@ -152,3 +87,78 @@ const std::vector<Square>& GameState::getMoves() const
 {
 	return m_Moves;
 }
+
+void GameState::handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+{
+	// First reset pawn move, this is overwritten if the move is a double pawn push
+	board.lastDoublePawnMove = { -1, -1 };
+	// Check if the move was a double pawn push
+	if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && std::abs(startRank - endRank) == 2)
+	{
+		board.lastDoublePawnMove = { endFile, endRank };
+	}
+	// Now check if it was an En Passant capture
+	else if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endFile != startFile && board.squares[endFile][endRank] == board.NONE)
+	{
+		board.squares[endFile][startRank] = board.NONE;
+	}
+}
+
+void GameState::handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+{
+	// If rook or king moved, we can no longer castle
+	if (piece == Board::WHITE_ROOK)
+	{
+		if (startFile == 0 && startRank == 7) { board.whiteRookQSMoved = true; }
+		if (startFile == 7 && startRank == 7) { board.whiteRookKSMoved = true; }
+	}
+	else if (piece == Board::BLACK_ROOK)
+	{
+		if (startFile == 0 && startRank == 0) { board.blackRookQSMoved = true; }
+		if (startFile == 7 && startRank == 0) { board.blackRookKSMoved = true; }
+	}
+	else if (piece == Board::WHITE_KING || piece == Board::BLACK_KING)
+	{
+		if (std::abs(startFile - endFile) == 2) // We are castling
+		{
+			if (endFile == 2) // Queenside
+			{
+				board.squares[3][endRank] = board.squares[0][endRank];
+				board.squares[0][endRank] = board.NONE;
+			}
+			else if (endFile == 6) // Kingside
+			{
+				board.squares[5][endRank] = board.squares[7][endRank];
+				board.squares[7][endRank] = board.NONE;
+			}
+		}
+		if (piece == Board::WHITE_KING) { board.whiteKingMoved = true; }
+		else { board.blackKingMoved = true; }
+	}
+
+	// Now check if either rook is captured
+	Board::PieceType targetPiece = board.getPieceAt(endFile, endRank);
+	if (targetPiece == Board::WHITE_ROOK)
+	{
+		if (endFile == 0 && endRank == 7)
+		{
+			board.whiteRookQSMoved = true;
+		}
+		else if (endFile == 7 && endRank == 7)
+		{
+			board.whiteRookKSMoved = true;
+		}
+	}
+	else if (targetPiece == Board::BLACK_ROOK)
+	{
+		if (endFile == 0 && endRank == 0)
+		{
+			board.blackRookQSMoved = true;
+		}
+		else if (endFile == 7 && endRank == 0)
+		{
+			board.blackRookKSMoved = true;
+		}
+	}
+}
+
