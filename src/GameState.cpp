@@ -6,6 +6,7 @@ GameState::GameState()
 
 	m_isWhiteTurn = true;
 	m_showMoves = false;
+	gameOver = false;
 
 }
 
@@ -37,7 +38,11 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 
 			board.squares[endFile][endRank] = piece;
 			board.squares[startFile][startRank] = board.NONE;
+
+			// check is that move was checkmate
 			m_isWhiteTurn = !m_isWhiteTurn;
+			gameOver = isCheckmate(board);
+
 			m_Moves.clear();
 			m_showMoves = false;
 
@@ -228,4 +233,31 @@ bool GameState::isInCheck(Board& board)
 	}
 
 	return false;
+}
+
+
+bool GameState::isCheckmate(Board& board)
+{
+	for (int f = 0; f < 8; f++)
+	{
+		for (int r = 0; r < 8; r++)
+		{
+			Board::PieceType piece = board.getPieceAt(f, r);
+			if (piece == board.NONE || board.getPieceColour(piece) != m_isWhiteTurn)
+			{
+				continue;
+			}
+			else
+			{
+				Piece* validator = m_Validator.getValidator(piece);
+				std::vector<Square> moves = validator->getPossibleMoves(board, f, r);
+				std::vector<Square> legalMoves = returnLegalMoves(board, moves, piece, f, r);
+				if (!legalMoves.empty())
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }

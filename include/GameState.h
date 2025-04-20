@@ -15,6 +15,8 @@ public:
 	// Constructor
 	GameState();
 
+	bool gameOver;
+
 	bool tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank);
 
 	void getPossibleMoves(Board& board, int startFile, int startRank);
@@ -32,5 +34,7 @@ public:
 	void handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRAnk);
 
 	bool isInCheck(Board& board);
+
+	bool isCheckmate(Board& board);
 
 };

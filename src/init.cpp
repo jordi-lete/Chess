@@ -2,6 +2,7 @@
 #include "SDL_handler.h"
 #include "BoardState.h"
 #include "GameState.h"
+#include <iostream>
 
 void Chess::run()
 {
@@ -68,6 +69,21 @@ void Chess::run()
 		}
 
 		handler.render(board, game);
+
+		// check for game end
+		if (game.gameOver)
+		{
+			if (game.getCurrentTurn())
+			{
+				std::cout << "Black wins!" << std::endl;
+			}
+			else
+			{
+				std::cout << "White wins!" << std::endl;
+			}
+			// Switch back to false so that the message doesn't keep printing
+			game.gameOver = false;
+		}
 	}
 
 }
