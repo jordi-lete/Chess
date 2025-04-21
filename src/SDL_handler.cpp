@@ -1,5 +1,4 @@
 #include "SDL_handler.h"
-#include <iostream>
 
 //Constructor
 SDL_handler::SDL_handler()
@@ -153,7 +152,7 @@ void SDL_handler::renderPossibleMoves(std::vector<Square> moves)
 	{
 		float xPixel = (move.file + 0.4) * m_squareWidth;
 		float yPixel = (move.rank + 0.4) * m_squareHeight;
-		SDL_FRect dest = { xPixel, yPixel, m_squareWidth / 5, m_squareHeight / 5 };
+		SDL_FRect dest = { xPixel + m_xOffset, yPixel + m_yOffset, m_squareWidth / 5, m_squareHeight / 5 };
 		SDL_RenderTexture(renderer, possibleMove, NULL, &dest);
 	}
 
@@ -264,12 +263,15 @@ void SDL_handler::resizeWindow(int width, int height)
 	{
 		m_xOffset = (width - height) / 2;
 		m_yOffset = 0;
-		std::cout << "x offset: " << m_xOffset << std::endl;
 	}
 	else if (height > width)
 	{
 		m_xOffset = 0;
 		m_yOffset = (height - width) / 2;
-		std::cout << "y offset: " << m_yOffset << std::endl;
+	}
+	else
+	{
+		m_xOffset = 0;
+		m_yOffset = 0;
 	}
 }
