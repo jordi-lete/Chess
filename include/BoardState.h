@@ -33,7 +33,11 @@ public:
 
 	PieceType getPieceAt(int file, int rank) const
 	{
-		return squares[file][rank];
+		if (file < 8 && rank < 8 && file >= 0 && rank >= 0)
+		{
+			return squares[file][rank];
+		}
+		return NONE;
 	}
 	
 	// returns true if white and false if black

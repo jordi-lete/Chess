@@ -1,4 +1,4 @@
-#include "init.h"
+#include "RunGame.h"
 
 int main() 
 {

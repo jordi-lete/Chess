@@ -4,6 +4,7 @@
 //Constructor
 SDL_handler::SDL_handler()
 {
+	m_boardSize = std::min(SCREEN_WIDTH, SCREEN_HEIGHT);
 	init();
 }
 
@@ -30,7 +31,7 @@ bool SDL_handler::init()
 	else
 	{
 		//Create window
-		window = SDL_CreateWindow("Powerup Chess", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
+		window = SDL_CreateWindow("Powerup Chess", m_boardSize, m_boardSize, SDL_WINDOW_RESIZABLE);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -106,7 +107,7 @@ void SDL_handler::renderBoard()
 
 			white ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
 
-			SDL_FRect square = { i * squareWidth, j * squareHeight, squareWidth, squareHeight};
+			SDL_FRect square = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight};
 
 			SDL_RenderFillRect(renderer, &square);
 
@@ -139,7 +140,7 @@ SDL_Texture* SDL_handler::loadImage(std::string imageFile)
 void SDL_handler::renderPiece(SDL_Texture* piece, int file, int rank)
 {
 
-	SDL_FRect dest = { file * squareWidth, rank * squareHeight, squareWidth, squareHeight };
+	SDL_FRect dest = { (file * m_squareWidth) + m_xOffset, (rank * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight };
 
 	SDL_RenderTexture(renderer, piece, NULL, &dest);
 
@@ -150,9 +151,9 @@ void SDL_handler::renderPossibleMoves(std::vector<Square> moves)
 
 	for (auto& move : moves)
 	{
-		float xPixel = (move.file + 0.4) * squareWidth;
-		float yPixel = (move.rank + 0.4) * squareHeight;
-		SDL_FRect dest = { xPixel, yPixel, squareWidth / 5, squareHeight / 5 };
+		float xPixel = (move.file + 0.4) * m_squareWidth;
+		float yPixel = (move.rank + 0.4) * m_squareHeight;
+		SDL_FRect dest = { xPixel, yPixel, m_squareWidth / 5, m_squareHeight / 5 };
 		SDL_RenderTexture(renderer, possibleMove, NULL, &dest);
 	}
 
@@ -248,8 +249,27 @@ Square SDL_handler::snapToBoard(int pixelX, int pixelY)
 {
 	Square square;
 
-	square.file = pixelX / squareWidth;
-	square.rank = pixelY / squareHeight;
+	square.file = (pixelX - m_xOffset) / m_squareWidth;
+	square.rank = (pixelY - m_yOffset) / m_squareHeight;
 
 	return square;
+}
+
+void SDL_handler::resizeWindow(int width, int height)
+{
+	m_boardSize = std::min(width, height);
+	m_squareWidth = (float)m_boardSize / 8.0f;
+	m_squareHeight = (float)m_boardSize / 8.0f;
+	if (width > height)
+	{
+		m_xOffset = (width - height) / 2;
+		m_yOffset = 0;
+		std::cout << "x offset: " << m_xOffset << std::endl;
+	}
+	else if (height > width)
+	{
+		m_xOffset = 0;
+		m_yOffset = (height - width) / 2;
+		std::cout << "y offset: " << m_yOffset << std::endl;
+	}
 }
