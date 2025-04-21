@@ -93,7 +93,7 @@ std::vector<Square> GameState::returnLegalMoves(Board& board, std::vector<Square
 		if ((piece == board.WHITE_KING || piece == board.BLACK_KING) && std::abs(startFile - move.file) == 2)
 		{
 			int direction = (move.file - startFile) / 2;
-			if (isAttacked(board, startFile + direction, move.rank))
+			if (isAttacked(board, startFile + direction, move.rank) || isAttacked(board, startFile, startRank))
 			{
 				continue;
 			}
