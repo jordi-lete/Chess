@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Source files
 set(SOURCES
     src/Main.cpp
-    src/init.cpp
+    src/RunGame.cpp
     src/SDL_handler.cpp
     src/BoardState.cpp
     src/GameState.cpp
@@ -22,7 +22,7 @@ set(SOURCES
 
 # Headers
 set(HEADERS
-    include/init.h
+    include/RunGame.h
     include/SDL_handler.h
     include/BoardState.h
     include/GameState.h

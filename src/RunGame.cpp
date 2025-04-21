@@ -1,4 +1,4 @@
-#include "init.h"
+#include "RunGame.h"
 #include "SDL_handler.h"
 #include "BoardState.h"
 #include "GameState.h"
@@ -27,6 +27,12 @@ void Chess::run()
 		{
 			running = false;
 			break;
+		}
+		case SDL_EVENT_WINDOW_RESIZED:
+		{
+			int width = handler.event.window.data1;
+			int height = handler.event.window.data2;
+			handler.resizeWindow(width, height);
 		}
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
