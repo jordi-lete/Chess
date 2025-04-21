@@ -89,6 +89,15 @@ std::vector<Square> GameState::returnLegalMoves(Board& board, std::vector<Square
 	{
 		// Make the move on the fake board first
 		Board fakeBoard = board;
+		// If the move is castling then check the in between move is not in check either
+		if ((piece == board.WHITE_KING || piece == board.BLACK_KING) && std::abs(startFile - move.file) == 2)
+		{
+			int direction = (move.file - startFile) / 2;
+			if (isAttacked(board, startFile + direction, move.rank))
+			{
+				continue;
+			}
+		}
 		fakeBoard.squares[move.file][move.rank] = piece;
 		fakeBoard.squares[startFile][startRank] = board.NONE;
 		if (!isInCheck(fakeBoard))
@@ -208,31 +217,7 @@ bool GameState::isInCheck(Board& board)
 	}
 
 	// Now we check if any of the opposition pieces are attacking the kingPos
-	for (int f = 0; f < 8; f++)
-	{
-		for (int r = 0; r < 8; r++)
-		{
-			Board::PieceType piece = board.getPieceAt(f, r);
-			if (piece == board.NONE || board.getPieceColour(piece) == m_isWhiteTurn)
-			{
-				continue;
-			}
-			else
-			{
-				Piece* validator = m_Validator.getValidator(piece);
-				std::vector<Square> pieceMoves = validator->getPossibleMoves(board, f, r);
-				for (auto& move : pieceMoves)
-				{
-					if (move.file == kingPos.file && move.rank == kingPos.rank)
-					{
-						return true;
-					}
-				}
-			}
-		}
-	}
-
-	return false;
+	return isAttacked(board, kingPos.file, kingPos.rank);
 }
 
 
@@ -260,4 +245,34 @@ bool GameState::isCheckmate(Board& board)
 		}
 	}
 	return true;
+}
+
+// Check if a square is under attack
+bool GameState::isAttacked(Board& board, int file, int rank)
+{
+	// Now we check if any of the opposition pieces are attacking the kingPos
+	for (int f = 0; f < 8; f++)
+	{
+		for (int r = 0; r < 8; r++)
+		{
+			Board::PieceType piece = board.getPieceAt(f, r);
+			if (piece == board.NONE || board.getPieceColour(piece) == m_isWhiteTurn)
+			{
+				continue;
+			}
+			else
+			{
+				Piece* validator = m_Validator.getValidator(piece);
+				std::vector<Square> pieceMoves = validator->getPossibleMoves(board, f, r);
+				for (auto& move : pieceMoves)
+				{
+					if (move.file == file && move.rank == rank)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }

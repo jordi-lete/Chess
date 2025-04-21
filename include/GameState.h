@@ -37,4 +37,6 @@ public:
 
 	bool isCheckmate(Board& board);
 
+	bool isAttacked(Board& board, int file, int rank);
+
 };
