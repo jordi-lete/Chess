@@ -98,6 +98,7 @@ std::vector<Square> GameState::returnLegalMoves(Board& board, std::vector<Square
 				continue;
 			}
 		}
+		handleEnPassant(fakeBoard, piece, startFile, startRank, move.file, move.rank);
 		fakeBoard.squares[move.file][move.rank] = piece;
 		fakeBoard.squares[startFile][startRank] = board.NONE;
 		if (!isInCheck(fakeBoard))
