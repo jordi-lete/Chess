@@ -74,6 +74,13 @@ void Chess::run()
 		}
 		}
 
+		if (game.promotionInProgress)
+		{
+			bool isWhite = game.getCurrentTurn();
+			Board::PieceType promoteTo = handler.showPromotionOptions(isWhite);
+			game.completePromotion(board, promoteTo);
+		}
+
 		handler.render(board, game);
 
 		// check for game end

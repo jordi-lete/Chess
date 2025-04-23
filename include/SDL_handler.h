@@ -56,4 +56,6 @@ public:
 
 	void resizeWindow(int width, int height);
 
+	Board::PieceType showPromotionOptions(bool isWhite);
+
 };

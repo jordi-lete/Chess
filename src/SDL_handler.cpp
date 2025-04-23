@@ -275,3 +275,108 @@ void SDL_handler::resizeWindow(int width, int height)
 		m_yOffset = 0;
 	}
 }
+
+Board::PieceType SDL_handler::showPromotionOptions(bool isWhite)
+{
+
+	bool waitingForSelection = true;
+	SDL_Event promoteEvent;
+
+	// Dim the background
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+	SDL_FRect fullscreen = { m_xOffset, m_yOffset, (float)m_boardSize, (float)m_boardSize };
+	SDL_RenderFillRect(renderer, &fullscreen);
+
+	// Calculate the promotion box dimensions and position
+	float padding = 1.1;
+	float boxWidth = (m_squareWidth * 4) * padding;
+	float boxHeight = m_squareHeight * padding;
+	float boxX = m_xOffset + m_boardSize / 2 - boxWidth / 2; // Center horizontally
+	float boxY = m_yOffset + m_boardSize / 2 - boxHeight / 2; // Center vertically
+
+	// Draw selection box
+	SDL_SetRenderDrawColor(renderer, 57, 158, 118, 200);
+	SDL_FRect selectionBox = { boxX, boxY, boxWidth, boxHeight };
+	SDL_RenderFillRect(renderer, &selectionBox);
+
+	SDL_Texture* promotionPieces[4];
+	Board::PieceType pieceType[4];
+	if (isWhite)
+	{
+		promotionPieces[0] = whiteKnight;
+		promotionPieces[1] = whiteBishop;
+		promotionPieces[2] = whiteRook;
+		promotionPieces[3] = whiteQueen;
+
+		pieceType[0] = Board::WHITE_KNIGHT;
+		pieceType[1] = Board::WHITE_BISHOP;
+		pieceType[2] = Board::WHITE_ROOK;
+		pieceType[3] = Board::WHITE_QUEEN;
+	}
+	else
+	{
+		promotionPieces[0] = blackKnight;
+		promotionPieces[1] = blackBishop;
+		promotionPieces[2] = blackRook;
+		promotionPieces[3] = blackQueen;
+
+		pieceType[0] = Board::BLACK_KNIGHT;
+		pieceType[1] = Board::BLACK_BISHOP;
+		pieceType[2] = Board::BLACK_ROOK;
+		pieceType[3] = Board::BLACK_QUEEN;
+	}
+
+	// Render the promotion pieces
+	for (int i = 0; i < 4; i++) {
+		SDL_FRect pieceRect = {
+			boxX + m_squareWidth * ((padding - 1) / 2) + i * (boxWidth / 4),
+			boxY + m_squareHeight * ((padding - 1) / 2),
+			m_squareWidth,
+			m_squareHeight
+		};
+		SDL_RenderTexture(renderer, promotionPieces[i], NULL, &pieceRect);
+	}
+
+	SDL_RenderPresent(renderer);
+
+	Board::PieceType selection = Board::NONE;
+	int squareX = -1;
+	bool insideY = false;
+
+	while (waitingForSelection && SDL_WaitEvent(&promoteEvent))
+	{
+		if (promoteEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			int xStart = promoteEvent.button.x;
+			int yStart = promoteEvent.button.y;
+			squareX = floor((xStart - boxX) / (boxWidth / 4));
+			insideY = floor((yStart - boxY) / (boxHeight)) == 0;
+		}
+		else if (promoteEvent.type == SDL_EVENT_MOUSE_BUTTON_UP)
+		{
+			int xEnd = promoteEvent.button.x;
+			int yEnd = promoteEvent.button.y;
+			int squareXEnd = floor((xEnd - boxX) / (boxWidth / 4));
+			bool insideYEnd = floor((yEnd - boxY) / (boxHeight)) == 0;
+			// If we click inside box and the relase position is the same square as click position
+			if (insideY && insideYEnd && squareX > -1 && squareX < 4 && squareX == squareXEnd)
+			{
+				selection = pieceType[squareX];
+			}
+			waitingForSelection = false;
+		}
+		else if (promoteEvent.type == SDL_EVENT_QUIT)
+		{
+			waitingForSelection = false;
+		}
+		else if (promoteEvent.type == SDL_EVENT_WINDOW_RESIZED)
+		{
+			int width = promoteEvent.window.data1;
+			int height = promoteEvent.window.data2;
+			resizeWindow(width, height);
+		}
+	}
+
+	return selection;
+}

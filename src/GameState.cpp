@@ -7,6 +7,7 @@ GameState::GameState()
 	m_isWhiteTurn = true;
 	m_showMoves = false;
 	gameOver = false;
+	promotionInProgress = false;
 
 }
 
@@ -33,6 +34,14 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	{
 		if (move.file == endFile && move.rank == endRank)
 		{
+			// Handle promotion first as the player may decide to cancel
+			if (handlePromotion(board, piece, startFile, startRank, endFile, endRank))
+			{
+				m_Moves.clear();
+				m_showMoves = false;
+				return false;
+			}
+
 			handleEnPassant(board, piece, startFile, startRank, endFile, endRank);
 			handleCastling(board, piece, startFile, startRank, endFile, endRank);
 
@@ -197,6 +206,35 @@ void GameState::handleCastling(Board& board, Board::PieceType piece, int startFi
 			board.blackRookKSMoved = true;
 		}
 	}
+}
+
+bool GameState::handlePromotion(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+{
+	bool isWhite = board.getPieceColour(piece);
+	int promotionSquare = isWhite ? 0 : 7;
+
+	if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endRank == promotionSquare)
+	{
+		m_promotionData.endFile = endFile;
+		m_promotionData.endRank = endRank;
+		m_promotionData.startFile = startFile;
+		m_promotionData.startRank = startRank;
+		promotionInProgress = true;
+		return true;
+	}
+	return false; // Non promotion move played
+}
+
+void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
+{
+	if (promotionPiece != Board::NONE)
+	{
+		board.squares[m_promotionData.endFile][m_promotionData.endRank] = promotionPiece;
+		board.squares[m_promotionData.startFile][m_promotionData.startRank] = Board::NONE;
+		m_isWhiteTurn = !m_isWhiteTurn;
+		gameOver = isCheckmate(board);
+	}
+	promotionInProgress = false;
 }
 
 bool GameState::isInCheck(Board& board)
