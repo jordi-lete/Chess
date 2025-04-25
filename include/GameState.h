@@ -1,6 +1,7 @@
 #pragma once
 #include "BoardState.h"
 #include "Validator.h"
+#include "Evaluate.h"
 
 struct Promotion
 {
@@ -21,6 +22,7 @@ private:
 	bool m_showMoves;
 	Promotion m_promotionData;
 	bool m_success = false;
+	int m_evaluation;
 
 public:
 	// Constructor

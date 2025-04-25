@@ -1,4 +1,5 @@
 #include "GameState.h"
+#include <iostream>
 
 // Constructor
 GameState::GameState()
@@ -8,6 +9,7 @@ GameState::GameState()
 	m_showMoves = false;
 	gameOver = false;
 	promotionInProgress = false;
+	m_evaluation = 0;
 
 }
 
@@ -47,6 +49,9 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 
 			board.squares[endFile][endRank] = piece;
 			board.squares[startFile][startRank] = board.NONE;
+
+			m_evaluation = Evaluate::evaluatePosition(board);
+			std::cout << m_evaluation << std::endl;
 
 			// check is that move was checkmate
 			m_isWhiteTurn = !m_isWhiteTurn;
@@ -231,6 +236,7 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 	{
 		board.squares[m_promotionData.endFile][m_promotionData.endRank] = promotionPiece;
 		board.squares[m_promotionData.startFile][m_promotionData.startRank] = Board::NONE;
+		m_evaluation = Evaluate::evaluatePosition(board);
 		m_isWhiteTurn = !m_isWhiteTurn;
 		gameOver = isCheckmate(board);
 	}

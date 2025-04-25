@@ -10,8 +10,6 @@ std::vector<Square> Knight::getPossibleMoves(Board& board, int file, int rank)
 		{-2,-1}, {-2,1}, {-1,-2}, {-1,2}, {1,-2}, {1,2}, {2,-1}, {2,1}
 	};
 
-	// CHECK FOR PINS + CHECKS
-
 	for (int i = 0; i < 8; i++) 
 	{
 		int newFile = file + knightMoves[i][0];
