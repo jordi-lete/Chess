@@ -70,6 +70,8 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 
 }
 
+/* ----------------- Get all possible moves for a piece in the current position ----------------- */
+
 void GameState::getPossibleMoves(Board& board, int startFile, int startRank)
 {
 
@@ -124,6 +126,8 @@ std::vector<Square> GameState::returnLegalMoves(Board& board, std::vector<Square
 	return legalMoves;
 }
 
+/* ----------------- Utility Functions ----------------- */
+
 bool GameState::getCurrentTurn()
 {
 	return m_isWhiteTurn;
@@ -138,6 +142,8 @@ const std::vector<Square>& GameState::getMoves() const
 {
 	return m_Moves;
 }
+
+/* ----------------- Special Cases ----------------- */
 
 void GameState::handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
 {
@@ -243,6 +249,8 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 	promotionInProgress = false;
 }
 
+/* ----------------- Check if king is attacked ----------------- */
+
 bool GameState::isInCheck(Board& board)
 {
 	Board::PieceType king = m_isWhiteTurn ? board.WHITE_KING : board.BLACK_KING;
@@ -292,7 +300,8 @@ bool GameState::isCheckmate(Board& board)
 	return true;
 }
 
-// Check if a square is under attack
+/* ----------------- Check if a square is under attack ----------------- */
+
 bool GameState::isAttacked(Board& board, int file, int rank)
 {
 	// Now we check if any of the opposition pieces are attacking the kingPos

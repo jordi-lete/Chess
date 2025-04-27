@@ -13,7 +13,6 @@ SDL_handler::~SDL_handler()
 	cleanup();
 }
 
-
 bool SDL_handler::init()
 {
 
@@ -243,6 +242,8 @@ void SDL_handler::render(const Board& board, const GameState& game)
 
 	SDL_RenderPresent(renderer);
 }
+
+/* ----------------- Convert from pixel to board coordinates ----------------- */
 
 Square SDL_handler::snapToBoard(int pixelX, int pixelY)
 {
