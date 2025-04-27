@@ -10,13 +10,19 @@ void Chess::run()
 	GameState game;
 	SDL_handler handler;
 
-	handler.render(board, game);
-
 	bool running = true;
 	Square clickedSquare;
 	Square placeSquare;
 	Square lastClick;
 	bool useLastClick = false;
+
+	/* -------- Render piece while dragging it -------- */
+	bool holdingPiece = false;
+	int mouseX = 0;
+	int mouseY = 0;
+	/* ------------------------------------------------ */
+
+	handler.render(board, game);
 
 	// start an event loop
 	while (running && SDL_WaitEvent(&handler.event)) 
@@ -38,12 +44,20 @@ void Chess::run()
 		{
 			int xStart = handler.event.button.x;
 			int yStart = handler.event.button.y;
+			mouseX = xStart;
+			mouseY = yStart;
 			clickedSquare = handler.snapToBoard(xStart, yStart);
+			Board::PieceType piece = board.getPieceAt(clickedSquare.file, clickedSquare.rank);
+			if (piece != board.NONE && board.getPieceColour(piece) == game.getCurrentTurn())
+			{
+				holdingPiece = true;
+			}
 			game.getPossibleMoves(board, clickedSquare.file, clickedSquare.rank);
 			break;
 		}
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
+			holdingPiece = false;
 			int xEnd = handler.event.button.x;
 			int yEnd = handler.event.button.y;
 			placeSquare = handler.snapToBoard(xEnd, yEnd);
@@ -72,6 +86,15 @@ void Chess::run()
 			}
 			break;
 		}
+		case SDL_EVENT_MOUSE_MOTION:
+		{
+			if (holdingPiece)
+			{
+				mouseX = handler.event.motion.x;
+				mouseY = handler.event.motion.y;
+			}
+			break;
+		}
 		}
 
 		if (game.promotionInProgress)
@@ -81,7 +104,7 @@ void Chess::run()
 			game.completePromotion(board, promoteTo);
 		}
 
-		handler.render(board, game);
+		handler.render(board, game, holdingPiece, mouseX, mouseY, clickedSquare);
 
 		// check for game end
 		if (game.gameOver)

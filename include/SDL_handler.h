@@ -50,7 +50,9 @@ public:
 
 	void renderPossibleMoves(std::vector<Square> moves);
 
-	void render(const Board &board, const GameState &game);
+	void renderHeldPiece(const Board& board, int mouseX, int mouseY, Square clickedSquare);
+
+	void render(const Board& board, const GameState& game, bool holdingPiece = false, int mouseX = 0, int mouseY = 0, Square clickedSquare = {});
 
 	Square snapToBoard(int pixelX, int pixelY);
 
