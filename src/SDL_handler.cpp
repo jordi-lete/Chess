@@ -158,7 +158,40 @@ void SDL_handler::renderPossibleMoves(std::vector<Square> moves)
 
 }
 
-void SDL_handler::render(const Board& board, const GameState& game)
+void SDL_handler::renderHeldPiece(const Board& board, int mouseX, int mouseY, Square clickedSquare)
+{
+	/* -------- Render square tile -------- */
+	bool isLightSquare = (clickedSquare.file + clickedSquare.rank) % 2 == 0;
+	isLightSquare ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
+	SDL_FRect square = { (clickedSquare.file * m_squareWidth) + m_xOffset, (clickedSquare.rank * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight };
+	SDL_RenderFillRect(renderer, &square);
+	/* ------------------------------------ */
+
+	/*  Now render piece in mouse position  */
+	Board::PieceType piece = board.getPieceAt(clickedSquare.file, clickedSquare.rank);
+	SDL_Texture* pieceTexture = nullptr;
+	switch (piece)
+	{
+	case Board::WHITE_PAWN: pieceTexture = whitePawn; break;
+	case Board::WHITE_KNIGHT: pieceTexture = whiteKnight; break;
+	case Board::WHITE_BISHOP: pieceTexture = whiteBishop; break;
+	case Board::WHITE_ROOK: pieceTexture = whiteRook; break;
+	case Board::WHITE_QUEEN: pieceTexture = whiteQueen; break;
+	case Board::WHITE_KING: pieceTexture = whiteKing; break;
+	case Board::BLACK_PAWN: pieceTexture = blackPawn; break;
+	case Board::BLACK_KNIGHT: pieceTexture = blackKnight; break;
+	case Board::BLACK_BISHOP: pieceTexture = blackBishop; break;
+	case Board::BLACK_ROOK: pieceTexture = blackRook; break;
+	case Board::BLACK_QUEEN: pieceTexture = blackQueen; break;
+	case Board::BLACK_KING: pieceTexture = blackKing; break;
+	}
+	SDL_FRect dest = { mouseX - (m_squareWidth / 2), mouseY - (m_squareHeight / 2), m_squareWidth, m_squareHeight};
+	SDL_RenderTexture(renderer, pieceTexture, NULL, &dest);
+	/* ----------------------------------- */
+
+}
+
+void SDL_handler::render(const Board& board, const GameState& game, bool holdingPiece, int mouseX, int mouseY, Square clickedSquare)
 {
 	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
 	SDL_RenderClear(renderer);
@@ -239,6 +272,11 @@ void SDL_handler::render(const Board& board, const GameState& game)
 	if (game.showMoves())
 	{
 		renderPossibleMoves(game.getMoves());
+	}
+
+	if (holdingPiece)
+	{
+		renderHeldPiece(board, mouseX, mouseY, clickedSquare);
 	}
 
 	SDL_RenderPresent(renderer);
