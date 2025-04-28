@@ -4,6 +4,7 @@
 SDL_handler::SDL_handler()
 {
 	m_boardSize = std::min(SCREEN_WIDTH, SCREEN_HEIGHT);
+	m_audioStream = nullptr;
 	init();
 }
 
@@ -20,7 +21,7 @@ bool SDL_handler::init()
 	screenSurface = NULL;
 	renderer = NULL;
 
-	if (!SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
 	{
 		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		cleanup();
@@ -42,9 +43,32 @@ bool SDL_handler::init()
 	}
 
 	loadPieceTextures();
+	if (!initAudio())
+	{
+		printf("Failed to initialise Audio\n");
+	}
+	loadSoundFiles();
 
 	return true;
 
+}
+
+bool SDL_handler::initAudio()
+{
+	SDL_AudioSpec desired;
+	SDL_zero(desired);
+	desired.freq = 48000;
+	desired.format = SDL_AUDIO_F32;
+	desired.channels = 2;
+
+	m_audioStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &desired, NULL, NULL);
+	if (!m_audioStream)
+	{
+		printf("Failed to open audio device: %s\n", SDL_GetError());
+		return false;
+	}
+	SDL_ResumeAudioStreamDevice(m_audioStream);
+	return true;
 }
 
 void SDL_handler::cleanup()
@@ -65,6 +89,13 @@ void SDL_handler::cleanup()
 	SDL_DestroyTexture(blackKing);
 
 	SDL_DestroyTexture(possibleMove);
+
+	// Free WAV buffers
+	SDL_free(moveSound.buffer);
+	SDL_free(captureSound.buffer);
+	SDL_free(checkSound.buffer);
+	// Close audio device
+	SDL_DestroyAudioStream(m_audioStream);
 
 	SDL_DestroySurface(screenSurface);
 	SDL_DestroyWindow(window);
@@ -93,30 +124,6 @@ void SDL_handler::loadPieceTextures()
 	possibleMove = loadImage("assets/circle_tp.png");
 }
 
-void SDL_handler::renderBoard()
-{
-
-	bool white = true; //First square rendered (top left) is white
-
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-
-			white ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
-
-			SDL_FRect square = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight};
-
-			SDL_RenderFillRect(renderer, &square);
-
-			white = !white;
-
-		}
-		white = !white;
-	}
-
-}
-
 SDL_Texture* SDL_handler::loadImage(std::string imageFile)
 {
 
@@ -132,6 +139,109 @@ SDL_Texture* SDL_handler::loadImage(std::string imageFile)
 	SDL_DestroySurface(image);
 
 	return pieceTexture;
+
+}
+
+void SDL_handler::loadSoundFiles()
+{
+	loadSound("sounds/move-self.wav", moveSound);
+	loadSound("sounds/capture.wav", captureSound);
+	loadSound("sounds/move-check.wav", checkSound);
+}
+
+
+bool SDL_handler::loadSound(const char* filename, Sound& sound)
+{
+	SDL_AudioSpec wavSpec;
+	Uint8* wavBuffer;
+	Uint32 wavLength;
+
+	if (SDL_LoadWAV(filename, &wavSpec, &wavBuffer, &wavLength) == NULL) {
+		printf("Failed to load WAV: %s\n", SDL_GetError());
+		return false;
+	}
+
+	sound.buffer = wavBuffer;
+	sound.length = wavLength;
+	sound.spec = wavSpec;
+
+	return true;
+}
+
+void SDL_handler::playSound(const Sound& sound)
+{
+	SDL_AudioSpec desired;
+	SDL_zero(desired);
+	desired.freq = 48000;
+	desired.format = SDL_AUDIO_F32;
+	desired.channels = 2;
+
+	SDL_AudioStream* tempStream = SDL_CreateAudioStream(&sound.spec, &desired);
+	if (!tempStream)
+	{
+		printf("Failed to create audio stream %s\n", SDL_GetError());
+		return;
+	}
+
+	if (SDL_PutAudioStreamData(tempStream, sound.buffer, sound.length) == -1)
+	{
+		printf("Failed to put data into stream %s\n", SDL_GetError());
+		return;
+	}
+
+	const int bufferSize = 4096;
+	float buffer[bufferSize];
+
+	int bytesRead;
+	while ((bytesRead = SDL_GetAudioStreamData(tempStream, buffer, bufferSize)) > 0)
+	{
+		if (SDL_PutAudioStreamData(m_audioStream, buffer, bytesRead) < 0)
+		{
+			printf("Failed to put data into master stream: %s\n", SDL_GetError());
+			break;
+		}
+	}
+
+	SDL_DestroyAudioStream(tempStream);
+}
+
+void SDL_handler::playMoveSound(bool isCapture, bool isCheck)
+{
+	if (isCapture)
+	{
+		playSound(captureSound);
+	}
+	else if (isCheck)
+	{
+		playSound(checkSound);
+	}
+	else
+	{
+		playSound(moveSound);
+	}
+}
+
+void SDL_handler::renderBoard()
+{
+
+	bool white = true; //First square rendered (top left) is white
+
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+
+			white ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
+
+			SDL_FRect square = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight };
+
+			SDL_RenderFillRect(renderer, &square);
+
+			white = !white;
+
+		}
+		white = !white;
+	}
 
 }
 

@@ -47,6 +47,7 @@ add_executable(Powerup_Chess ${SOURCES} ${HEADERS})
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/Users/jordi/Documents/Projects/Powerup_Chess/vcpkg_installed/x64-windows")
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/sounds DESTINATION ${CMAKE_BINARY_DIR})
 
 # Find and link SDL3
 find_package(SDL3 CONFIG REQUIRED)
