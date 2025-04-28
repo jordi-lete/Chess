@@ -1,10 +1,17 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3/SDL_audio.h>
 #include <string>
 #include "BoardState.h"
 #include "GameState.h"
 #include <vector>
+
+struct Sound {
+	Uint8* buffer;
+	Uint32 length;
+	SDL_AudioSpec spec;
+};
 
 class SDL_handler
 {
@@ -21,9 +28,34 @@ private:
 	SDL_Texture* blackPawn, * blackRook, * blackKnight, * blackBishop, * blackQueen, * blackKing;
 	SDL_Texture* possibleMove;
 
+	SDL_AudioStream* m_audioStream;
+	Sound moveSound;
+	Sound captureSound;
+	Sound checkSound;
+
+	void cleanup();
+
+	bool init();
+
+	bool initAudio();
+
 	void loadPieceTextures();
 
 	SDL_Texture* loadImage(std::string imageFile);
+
+	bool loadSound(const char* filename, Sound& sound);
+
+	void loadSoundFiles();
+
+	void playSound(const Sound& sound);
+
+	void renderBoard();
+
+	void renderPiece(SDL_Texture* piece, int file, int rank);
+
+	void renderPossibleMoves(std::vector<Square> moves);
+
+	void renderHeldPiece(const Board& board, int mouseX, int mouseY, Square clickedSquare);
 
 public:
 
@@ -40,17 +72,7 @@ public:
 	//Destructor
 	~SDL_handler();
 
-	void cleanup();
-
-	bool init();
-
-	void renderBoard();
-
-	void renderPiece(SDL_Texture* piece, int file, int rank);
-
-	void renderPossibleMoves(std::vector<Square> moves);
-
-	void renderHeldPiece(const Board& board, int mouseX, int mouseY, Square clickedSquare);
+	void playMoveSound(bool isCapture, bool isCheck);
 
 	void render(const Board& board, const GameState& game, bool holdingPiece = false, int mouseX = 0, int mouseY = 0, Square clickedSquare = {});
 
