@@ -84,6 +84,8 @@ The executable will be located in the build directory, typically:
 
 - `include/` - Header files
 - `src/` - Source files
+- `assets/` - Texture files
+- `sounds/` - Audio files
 - `CMakeLists.txt` - CMake build configuration
 - `vcpkg.json` - Dependencies manifest
 
