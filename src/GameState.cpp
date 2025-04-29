@@ -13,7 +13,97 @@ GameState::GameState()
 
 }
 
-bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank)
+bool GameState::makeMove(Board& board, Move& move)
+{
+	move.capturedPiece = board.getPieceAt(move.endFile, move.endRank);
+	move.ps_enPassantTarget = board.lastDoublePawnMove;
+	handleEnPassant(board, move.movingPiece, move.startFile, move.startRank, move.endFile, move.endRank, &move);
+
+	if (move.capturedPiece != Board::NONE)
+	{
+		// play catpure sound
+	}
+
+	if (handleCastling(board, move.movingPiece, move.startFile, move.startRank, move.endFile, move.endRank, &move))
+	{
+		// play castling sound
+	}
+
+	if (move.isPromotion)
+	{
+		board.squares[move.endFile][move.endRank] = move.promotionPiece;
+	}
+	else
+	{
+		board.squares[move.endFile][move.endRank] = move.movingPiece;
+	}
+
+	board.squares[move.startFile][move.startRank] = Board::NONE;
+
+	m_isWhiteTurn = !m_isWhiteTurn;
+
+	return true;
+}
+
+std::vector<Move> GameState::generateAllLegalMoves(Board& board)
+{
+	std::vector<Move> legalMoves;
+
+	for (int startFile = 0; startFile < 8; startFile++)
+	{
+		for (int startRank = 0; startRank < 8; startRank++)
+		{
+			Board::PieceType piece = board.getPieceAt(startFile, startRank);
+			if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn)
+			{
+				continue;
+			}
+			Piece* validator = m_Validator.getValidator(piece);
+			std::vector<Square> possibleMoves = validator->getPossibleMoves(board, startFile, startRank);
+			std::vector<Square> pieceLegalMoves = returnLegalMoves(board, possibleMoves, piece, startFile, startRank);
+
+			for (const auto& dest : pieceLegalMoves)
+			{
+				Move move;
+				move.startFile = startFile;
+				move.startRank = startRank;
+				move.endFile = dest.file;
+				move.endRank = dest.rank;
+				move.movingPiece = piece;
+				move.isEnPassant = ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && dest.file != startFile && board.squares[dest.file][dest.rank] == board.NONE);
+				move.isCastling = ((piece == Board::WHITE_KING || piece == Board::BLACK_KING) && std::abs(dest.file - startFile) == 2);
+				bool isWhite = board.getPieceColour(piece);
+				int promotionSquare = isWhite ? 0 : 7;
+				move.isPromotion = ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && dest.rank == promotionSquare);
+
+				Move tempMove = move;
+
+				if (move.isPromotion)
+				{
+					Board::PieceType promotionPieces[4] = {
+						isWhite ? Board::WHITE_KNIGHT : Board::BLACK_KNIGHT,
+						isWhite ? Board::WHITE_BISHOP : Board::BLACK_BISHOP,
+						isWhite ? Board::WHITE_ROOK : Board::BLACK_ROOK,
+						isWhite ? Board::WHITE_QUEEN : Board::BLACK_QUEEN
+					};
+					for (auto& promotionPiece : promotionPieces)
+					{
+						tempMove.promotionPiece = promotionPiece;
+						legalMoves.push_back(tempMove);
+					}
+				}
+				else
+				{
+					legalMoves.push_back(move);
+				}
+			}
+		}
+	}
+
+	return legalMoves;
+}
+
+bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank, Board::PieceType promotionPiece)
 {
 
 	Board::PieceType piece = board.getPieceAt(startFile, startRank);
@@ -26,29 +116,22 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 		return false;
 	}
 
-	// Find the correct set of methods for that piece
-	Piece* validator = m_Validator.getValidator(piece);
-
-	std::vector<Square> possibleMoves = validator->getPossibleMoves(board, startFile, startRank);
-	std::vector<Square> legalMoves = returnLegalMoves(board, possibleMoves, piece, startFile, startRank);
+	std::vector<Move> legalMoves = generateAllLegalMoves(board);
 	
 	for (auto& move : legalMoves)
 	{
-		if (move.file == endFile && move.rank == endRank)
+		if (move.startFile == startFile && move.startRank == startRank && move.endFile == endFile && move.endRank == endRank)
 		{
 			// Handle promotion first as the player may decide to cancel
-			if (handlePromotion(board, piece, startFile, startRank, endFile, endRank))
+			move.promotionPiece = promotionPiece;
+			if (handlePromotion(board, move))
 			{
 				m_Moves.clear();
 				m_showMoves = false;
 				return false;
 			}
 
-			handleEnPassant(board, piece, startFile, startRank, endFile, endRank);
-			handleCastling(board, piece, startFile, startRank, endFile, endRank);
-
-			board.squares[endFile][endRank] = piece;
-			board.squares[startFile][startRank] = board.NONE;
+			makeMove(board, move);
 
 			m_evaluation = Evaluate::evaluatePosition(board);
 			std::cout << m_evaluation << std::endl;
@@ -143,9 +226,9 @@ const std::vector<Square>& GameState::getMoves() const
 	return m_Moves;
 }
 
-/* ----------------- Special Cases ----------------- */
+/* -------------- Special Cases -------------- */
 
-void GameState::handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+void GameState::handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank, Move* move)
 {
 	// First reset pawn move, this is overwritten if the move is a double pawn push
 	board.lastDoublePawnMove = { -1, -1 };
@@ -157,12 +240,29 @@ void GameState::handleEnPassant(Board& board, Board::PieceType piece, int startF
 	// Now check if it was an En Passant capture
 	else if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endFile != startFile && board.squares[endFile][endRank] == board.NONE)
 	{
+		if (move != nullptr)
+		{
+			move->isEnPassant = true;
+			move->capturedPiece = board.getPieceAt(endFile, startRank);	
+		}
 		board.squares[endFile][startRank] = board.NONE;
 	}
 }
 
-void GameState::handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+bool GameState::handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank, Move* move)
 {
+	bool castling = false;
+	// We want to track the previous state of the board so we can later undo
+	if (move != nullptr)
+	{
+		move->ps_whiteKingMoved = board.whiteKingMoved;
+		move->ps_whiteRookKSMoved = board.whiteRookKSMoved;
+		move->ps_whiteRookQSMoved = board.whiteRookQSMoved;
+		move->ps_blackKingMoved = board.blackKingMoved;
+		move->ps_blackRookKSMoved = board.blackRookKSMoved;
+		move->ps_blackRookQSMoved = board.blackRookQSMoved;
+	}
+
 	// If rook or king moved, we can no longer castle
 	if (piece == Board::WHITE_ROOK)
 	{
@@ -178,6 +278,12 @@ void GameState::handleCastling(Board& board, Board::PieceType piece, int startFi
 	{
 		if (std::abs(startFile - endFile) == 2) // We are castling
 		{
+			castling = true;
+			if (move != nullptr)
+			{
+				move->isCastling = true;
+			}
+			// Move the rook here only
 			if (endFile == 2) // Queenside
 			{
 				board.squares[3][endRank] = board.squares[0][endRank];
@@ -217,20 +323,22 @@ void GameState::handleCastling(Board& board, Board::PieceType piece, int startFi
 			board.blackRookKSMoved = true;
 		}
 	}
+	return castling;
 }
 
-bool GameState::handlePromotion(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank)
+bool GameState::handlePromotion(Board& board, Move& move)
 {
-	bool isWhite = board.getPieceColour(piece);
-	int promotionSquare = isWhite ? 0 : 7;
 
-	if ((piece == Board::WHITE_PAWN || piece == Board::BLACK_PAWN) && endRank == promotionSquare)
+	if (move.isPromotion)
 	{
-		m_promotionData.endFile = endFile;
-		m_promotionData.endRank = endRank;
-		m_promotionData.startFile = startFile;
-		m_promotionData.startRank = startRank;
-		promotionInProgress = true;
+		if (move.promotionPiece == Board::NONE)
+		{
+			m_promotionData.endFile = move.endFile;
+			m_promotionData.endRank = move.endRank;
+			m_promotionData.startFile = move.startFile;
+			m_promotionData.startRank = move.startRank;
+			promotionInProgress = true;
+		}
 		return true;
 	}
 	return false; // Non promotion move played
@@ -240,11 +348,15 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 {
 	if (promotionPiece != Board::NONE)
 	{
-		board.squares[m_promotionData.endFile][m_promotionData.endRank] = promotionPiece;
-		board.squares[m_promotionData.startFile][m_promotionData.startRank] = Board::NONE;
+		Move promotionMove;
+		promotionMove.startFile = m_promotionData.startFile;
+		promotionMove.startRank = m_promotionData.startRank;
+		promotionMove.endFile = m_promotionData.endFile;
+		promotionMove.endRank = m_promotionData.endRank;
+		promotionMove.isPromotion = true;
+		promotionMove.promotionPiece = promotionPiece;
+		makeMove(board, promotionMove);
 		m_evaluation = Evaluate::evaluatePosition(board);
-		m_isWhiteTurn = !m_isWhiteTurn;
-		gameOver = isCheckmate(board);
 	}
 	promotionInProgress = false;
 }
