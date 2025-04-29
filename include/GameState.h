@@ -11,6 +11,30 @@ struct Promotion
 	Promotion() : endFile(-1), endRank(-1), startFile(-1), startRank(-1) {}
 };
 
+struct Move
+{
+	int startFile = -1;
+	int startRank = -1;
+	int endFile = -1;
+	int endRank = -1;
+	Board::PieceType movingPiece = Board::NONE;
+	Board::PieceType capturedPiece = Board::NONE;
+	bool isCapture = false;
+	bool isCastling = false;
+	bool isEnPassant = false;
+	bool isPromotion = false;
+	Board::PieceType promotionPiece = Board::NONE;
+
+	// The following are needed for undoing moves ( where ps = previous state )
+	Square ps_enPassantTarget = { -1,-1 };
+	bool ps_whiteKingMoved = false;
+	bool ps_blackKingMoved = false;
+	bool ps_whiteRookKSMoved = false;
+	bool ps_whiteRookQSMoved = false;
+	bool ps_blackRookKSMoved = false;
+	bool ps_blackRookQSMoved = false;
+};
+
 class GameState
 {
 
@@ -30,7 +54,11 @@ public:
 
 	bool promotionInProgress;
 
-	bool tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank);
+	bool makeMove(Board& board, Move& move);
+
+	std::vector<Move> generateAllLegalMoves(Board& board);
+
+	bool tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank, Board::PieceType promotionPiece = Board::NONE);
 
 	void getPossibleMoves(Board& board, int startFile, int startRank);
 
@@ -42,11 +70,11 @@ public:
 
 	const std::vector<Square>& GameState::getMoves() const;
 
-	void handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank);
+	void handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank, Move* move = nullptr);
 
-	void handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank);
+	bool handleCastling(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank, Move* move = nullptr);
 
-	bool handlePromotion(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank);
+	bool handlePromotion(Board& board, Move& move);
 
 	void completePromotion(Board& board, Board::PieceType promotionPiece);
 
