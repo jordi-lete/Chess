@@ -207,13 +207,13 @@ void SDL_handler::playSound(const Sound& sound)
 
 void SDL_handler::playMoveSound(bool isCapture, bool isCheck)
 {
-	if (isCapture)
-	{
-		playSound(captureSound);
-	}
-	else if (isCheck)
+	if (isCheck)
 	{
 		playSound(checkSound);
+	}
+	else if (isCapture)
+	{
+		playSound(captureSound);
 	}
 	else
 	{

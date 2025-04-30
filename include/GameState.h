@@ -20,7 +20,6 @@ struct Move
 	int endRank = -1;
 	Board::PieceType movingPiece = Board::NONE;
 	Board::PieceType capturedPiece = Board::NONE;
-	bool isCapture = false;
 	bool isCastling = false;
 	bool isEnPassant = false;
 	bool isPromotion = false;
@@ -45,7 +44,9 @@ private:
 	std::vector<Square> m_Moves;
 	bool m_showMoves;
 	Promotion m_promotionData;
-	bool m_success = false;
+	bool m_isCheck;
+	bool m_isCapture;
+	bool m_isCastling;
 	int m_evaluation;
 
 public:
@@ -53,6 +54,7 @@ public:
 	GameState();
 
 	bool gameOver;
+	bool moveMade;
 
 	bool promotionInProgress;
 
@@ -85,5 +87,9 @@ public:
 	bool isCheckmate(Board& board);
 
 	bool isAttacked(Board& board, int file, int rank);
+
+	bool getIsCheck();
+	bool getIsCapture();
+	bool getIsCastling();
 
 };

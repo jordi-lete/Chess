@@ -8,7 +8,11 @@ GameState::GameState()
 	m_isWhiteTurn = true;
 	m_showMoves = false;
 	gameOver = false;
+	moveMade = false;
 	promotionInProgress = false;
+	m_isCapture = false;
+	m_isCheck = false;
+	m_isCastling = false;
 	m_evaluation = 0;
 
 }
@@ -18,11 +22,9 @@ bool GameState::makeMove(Board& board, Move& move)
 	move.capturedPiece = board.getPieceAt(move.endFile, move.endRank);
 	move.ps_enPassantTarget = board.lastDoublePawnMove;
 	handleEnPassant(board, move.movingPiece, move.startFile, move.startRank, move.endFile, move.endRank, &move);
+	m_isCapture = (move.capturedPiece != Board::NONE) ? true : false;
+	m_isCastling = move.isCastling;
 
-	if (move.capturedPiece != Board::NONE)
-	{
-		// play catpure sound
-	}
 
 	if (handleCastling(board, move.movingPiece, move.startFile, move.startRank, move.endFile, move.endRank, &move))
 	{
@@ -40,7 +42,13 @@ bool GameState::makeMove(Board& board, Move& move)
 
 	board.squares[move.startFile][move.startRank] = Board::NONE;
 
+	// check if the opponent king in check and play check sound?
+	// else play regular move sound
+
 	m_isWhiteTurn = !m_isWhiteTurn;
+	// Do this after switching turns so we check if the opponent is in check
+	m_isCheck = isInCheck(board);
+	moveMade = true;
 
 	return true;
 }
@@ -441,4 +449,21 @@ bool GameState::isAttacked(Board& board, int file, int rank)
 		}
 	}
 	return false;
+}
+
+/* ------------ Retrieve private booleans ------------ */
+
+bool GameState::getIsCheck()
+{
+	return m_isCheck;
+}
+
+bool GameState::getIsCapture()
+{
+	return m_isCapture;
+}
+
+bool GameState::getIsCastling()
+{
+	return m_isCastling;
 }

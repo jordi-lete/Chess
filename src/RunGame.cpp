@@ -105,6 +105,11 @@ void Chess::run()
 		}
 
 		handler.render(board, game, holdingPiece, mouseX, mouseY, clickedSquare);
+		if (game.moveMade)
+		{
+			handler.playMoveSound(game.getIsCapture(), game.getIsCheck());
+			game.moveMade = false;
+		}
 
 		// check for game end
 		if (game.gameOver)
