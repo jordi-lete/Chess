@@ -115,10 +115,17 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 {
 
 	Board::PieceType piece = board.getPieceAt(startFile, startRank);
+	Board::PieceType targetPiece = board.getPieceAt(endFile, endRank);
 	// Check if it is the turn of the piece clicked
 	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn) 
 	{
-		// PLAY A SOUND OR DISPLAY ALERT?
+		m_showMoves = false;
+		m_Moves.clear();
+		return false;
+	}
+	// This is here to fix minor bug where possible moves would show if a piece was dragged onto friendly piece
+	if (targetPiece != Board::NONE && board.getPieceColour(targetPiece) == m_isWhiteTurn)
+	{
 		m_showMoves = false;
 		m_Moves.clear();
 		return false;
