@@ -18,7 +18,6 @@ set(SOURCES
     src/Rook.cpp
     src/Queen.cpp
     src/King.cpp
-    src/Evaluate.cpp
 )
 
 # Headers
@@ -35,7 +34,6 @@ set(HEADERS
     include/Queen.h
     include/King.h
     include/Validator.h
-    include/Evaluate.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)

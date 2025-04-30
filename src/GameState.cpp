@@ -13,7 +13,6 @@ GameState::GameState()
 	m_isCapture = false;
 	m_isCheck = false;
 	m_isCastling = false;
-	m_evaluation = 0;
 
 }
 
@@ -141,11 +140,7 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 
 			makeMove(board, move);
 
-			m_evaluation = Evaluate::evaluatePosition(board);
-			std::cout << m_evaluation << std::endl;
-
 			// check is that move was checkmate
-			m_isWhiteTurn = !m_isWhiteTurn;
 			gameOver = isCheckmate(board);
 
 			m_Moves.clear();
@@ -364,7 +359,6 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 		promotionMove.isPromotion = true;
 		promotionMove.promotionPiece = promotionPiece;
 		makeMove(board, promotionMove);
-		m_evaluation = Evaluate::evaluatePosition(board);
 	}
 	promotionInProgress = false;
 }
