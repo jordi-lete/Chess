@@ -145,7 +145,6 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 			std::cout << m_evaluation << std::endl;
 
 			// check is that move was checkmate
-			m_isWhiteTurn = !m_isWhiteTurn;
 			gameOver = isCheckmate(board);
 
 			m_Moves.clear();
