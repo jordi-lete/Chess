@@ -13,7 +13,6 @@ GameState::GameState()
 	m_isCapture = false;
 	m_isCheck = false;
 	m_isCastling = false;
-	m_evaluation = 0;
 
 }
 
@@ -51,6 +50,44 @@ bool GameState::makeMove(Board& board, Move& move)
 	moveMade = true;
 
 	return true;
+}
+
+void GameState::unmakeMove(Board& board, const Move& move)
+{
+	// move the piece back to it's start position
+	board.squares[move.startFile][move.startRank] = move.movingPiece;
+
+	if (move.isEnPassant)
+	{
+		board.squares[move.endFile][move.endRank] = Board::NONE;
+		board.squares[move.endFile][move.startRank] = move.capturedPiece;
+	}
+	else if (move.isCastling)
+	{
+		board.squares[move.endFile][move.endRank] = Board::NONE;
+		
+		int rookStartFile = (move.startFile < move.endFile) ? 7 : 0;
+		int rookEndFile = (move.startFile < move.endFile) ? 5 : 3;
+
+		// set the rook start square
+		board.squares[rookStartFile][move.endRank] = board.squares[rookEndFile][move.endRank];
+		// set the rook end squard back to none
+		board.squares[rookEndFile][move.endRank] = Board::NONE;
+	}
+	else
+	{
+		board.squares[move.endFile][move.endRank] = move.capturedPiece;
+	}
+
+	board.whiteKingMoved = move.ps_whiteKingMoved;
+	board.blackKingMoved = move.ps_blackKingMoved;
+	board.whiteRookKSMoved = move.ps_whiteRookKSMoved;
+	board.whiteRookQSMoved = move.ps_whiteRookQSMoved;
+	board.blackRookKSMoved = move.ps_blackRookKSMoved;
+	board.blackRookQSMoved = move.ps_blackRookQSMoved;
+	board.lastDoublePawnMove = move.ps_enPassantTarget;
+
+	m_isWhiteTurn = !m_isWhiteTurn;
 }
 
 std::vector<Move> GameState::generateAllLegalMoves(Board& board)
@@ -117,7 +154,14 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 	Board::PieceType piece = board.getPieceAt(startFile, startRank);
 	Board::PieceType targetPiece = board.getPieceAt(endFile, endRank);
 	// Check if it is the turn of the piece clicked
-	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn) 
+	if (piece == Board::NONE || board.getPieceColour(piece) != m_isWhiteTurn)
+	{
+		m_showMoves = false;
+		m_Moves.clear();
+		return false;
+	}
+	// This is here to fix minor bug where possible moves would show if a piece was dragged onto friendly piece
+	if (targetPiece != Board::NONE && board.getPieceColour(targetPiece) == m_isWhiteTurn)
 	{
 		m_showMoves = false;
 		m_Moves.clear();
@@ -147,9 +191,6 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 			}
 
 			makeMove(board, move);
-
-			m_evaluation = Evaluate::evaluatePosition(board);
-			std::cout << m_evaluation << std::endl;
 
 			// check is that move was checkmate
 			gameOver = isCheckmate(board);
@@ -370,7 +411,6 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 		promotionMove.isPromotion = true;
 		promotionMove.promotionPiece = promotionPiece;
 		makeMove(board, promotionMove);
-		m_evaluation = Evaluate::evaluatePosition(board);
 	}
 	promotionInProgress = false;
 }

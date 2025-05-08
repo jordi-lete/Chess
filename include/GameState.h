@@ -1,7 +1,6 @@
 #pragma once
 #include "BoardState.h"
 #include "Validator.h"
-#include "Evaluate.h"
 
 struct Promotion
 {
@@ -59,6 +58,8 @@ public:
 	bool promotionInProgress;
 
 	bool makeMove(Board& board, Move& move);
+
+	void unmakeMove(Board& board, const Move& move);
 
 	std::vector<Move> generateAllLegalMoves(Board& board);
 
