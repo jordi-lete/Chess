@@ -47,6 +47,7 @@ private:
 	bool m_isCapture;
 	bool m_isCastling;
 	int m_evaluation;
+	std::vector<Move> m_moveHistory;
 
 public:
 	// Constructor
@@ -60,6 +61,8 @@ public:
 	bool makeMove(Board& board, Move& move);
 
 	void unmakeMove(Board& board, const Move& move);
+
+	bool undoLastMove(Board& board);
 
 	std::vector<Move> generateAllLegalMoves(Board& board);
 
