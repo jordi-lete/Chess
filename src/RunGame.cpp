@@ -95,6 +95,14 @@ void Chess::run()
 			}
 			break;
 		}
+		case SDL_EVENT_KEY_DOWN:
+		{
+			if (handler.event.key.scancode == SDL_SCANCODE_LEFT)
+			{
+				game.undoLastMove(board);
+			}
+			break;
+		}
 		}
 
 		if (game.promotionInProgress)

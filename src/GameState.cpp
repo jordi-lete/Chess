@@ -49,6 +49,8 @@ bool GameState::makeMove(Board& board, Move& move)
 	m_isCheck = isInCheck(board);
 	moveMade = true;
 
+	m_moveHistory.push_back(move);
+
 	return true;
 }
 
@@ -88,6 +90,20 @@ void GameState::unmakeMove(Board& board, const Move& move)
 	board.lastDoublePawnMove = move.ps_enPassantTarget;
 
 	m_isWhiteTurn = !m_isWhiteTurn;
+}
+
+bool GameState::undoLastMove(Board& board)
+{
+	if (m_moveHistory.empty())
+	{
+		return false;
+	}
+	Move lastMove = m_moveHistory.back();
+	m_moveHistory.pop_back();
+
+	unmakeMove(board, lastMove);
+
+	return true;
 }
 
 std::vector<Move> GameState::generateAllLegalMoves(Board& board)
@@ -403,6 +419,7 @@ void GameState::completePromotion(Board& board, Board::PieceType promotionPiece)
 		promotionMove.endRank = m_promotionData.endRank;
 		promotionMove.isPromotion = true;
 		promotionMove.promotionPiece = promotionPiece;
+		promotionMove.movingPiece = m_isWhiteTurn ? Board::WHITE_PAWN : Board::BLACK_PAWN;
 		makeMove(board, promotionMove);
 	}
 	promotionInProgress = false;
