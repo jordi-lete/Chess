@@ -52,6 +52,44 @@ bool GameState::makeMove(Board& board, Move& move)
 	return true;
 }
 
+void GameState::unmakeMove(Board& board, const Move& move)
+{
+	// move the piece back to it's start position
+	board.squares[move.startFile][move.startRank] = move.movingPiece;
+
+	if (move.isEnPassant)
+	{
+		board.squares[move.endFile][move.endRank] = Board::NONE;
+		board.squares[move.endFile][move.startRank] = move.capturedPiece;
+	}
+	else if (move.isCastling)
+	{
+		board.squares[move.endFile][move.endRank] = Board::NONE;
+		
+		int rookStartFile = (move.startFile < move.endFile) ? 7 : 0;
+		int rookEndFile = (move.startFile < move.endFile) ? 5 : 3;
+
+		// set the rook start square
+		board.squares[rookStartFile][move.endRank] = board.squares[rookEndFile][move.endRank];
+		// set the rook end squard back to none
+		board.squares[rookEndFile][move.endRank] = Board::NONE;
+	}
+	else
+	{
+		board.squares[move.endFile][move.endRank] = move.capturedPiece;
+	}
+
+	board.whiteKingMoved = move.ps_whiteKingMoved;
+	board.blackKingMoved = move.ps_blackKingMoved;
+	board.whiteRookKSMoved = move.ps_whiteRookKSMoved;
+	board.whiteRookQSMoved = move.ps_whiteRookQSMoved;
+	board.blackRookKSMoved = move.ps_blackRookKSMoved;
+	board.blackRookQSMoved = move.ps_blackRookQSMoved;
+	board.lastDoublePawnMove = move.ps_enPassantTarget;
+
+	m_isWhiteTurn = !m_isWhiteTurn;
+}
+
 std::vector<Move> GameState::generateAllLegalMoves(Board& board)
 {
 	std::vector<Move> legalMoves;

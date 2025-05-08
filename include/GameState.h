@@ -59,6 +59,8 @@ public:
 
 	bool makeMove(Board& board, Move& move);
 
+	void unmakeMove(Board& board, const Move& move);
+
 	std::vector<Move> generateAllLegalMoves(Board& board);
 
 	bool tryMakeMove(Board& board, int startFile, int startRank, int endFile, int endRank, Board::PieceType promotionPiece = Board::NONE);
