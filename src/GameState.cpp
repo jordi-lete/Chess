@@ -167,13 +167,6 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 		m_Moves.clear();
 		return false;
 	}
-	// This is here to fix minor bug where possible moves would show if a piece was dragged onto friendly piece
-	if (targetPiece != Board::NONE && board.getPieceColour(targetPiece) == m_isWhiteTurn)
-	{
-		m_showMoves = false;
-		m_Moves.clear();
-		return false;
-	}
 
 	std::vector<Move> legalMoves = generateAllLegalMoves(board);
 	
