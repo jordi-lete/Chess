@@ -1,6 +1,6 @@
-# Powerup Chess
+# Chess
 
-A chess game with power-ups implemented using SDL3 and C++.
+A chess game implemented using SDL3 and C++.
 
 ## Prerequisites
 
@@ -13,8 +13,8 @@ A chess game with power-ups implemented using SDL3 and C++.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/Powerup_Chess.git
-cd Powerup_Chess
+git clone https://github.com/jordi-lete/Chess.git
+cd Chess
 ```
 
 ### 2. Install vcpkg
@@ -77,8 +77,8 @@ cmake --build . --config Debug
 ### 5. Run the Application
 
 The executable will be located in the build directory, typically:
-- `out/build/x64-Debug/Powerup_Chess.exe` (if using Visual Studio)
-- `build/Debug/Powerup_Chess.exe` (if using command line CMake)
+- `out/build/x64-Debug/Chess.exe` (if using Visual Studio)
+- `build/Debug/Chess.exe` (if using command line CMake)
 
 ## Project Structure
 
