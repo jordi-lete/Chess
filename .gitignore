@@ -5,6 +5,7 @@ Debug/
 Release/
 
 # vcpkg installed packages
+vcpkg/
 vcpkg_installed/
 
 # Visual Studio files
