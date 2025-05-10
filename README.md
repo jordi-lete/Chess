@@ -55,7 +55,7 @@ This will read the `vcpkg.json` file and install the required packages (SDL3).
 #### Using Visual Studio:
 
 1. Open Visual Studio
-2. Select "Open a local folder" and navigate to the Powerup_Chess directory
+2. Select "Open a local folder" and navigate to the Chess directory
 3. Visual Studio should automatically detect the CMake configuration
 4. Select the build configuration (Debug/Release) from the dropdown
 5. Build the project by clicking on "Build" or pressing F7
