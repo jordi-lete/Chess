@@ -31,8 +31,6 @@ cd vcpkg
 # Bootstrap vcpkg
 .\bootstrap-vcpkg.bat
 
-.\vcpkg integrate install
-
 # Add vcpkg to your PATH (optional)
 $env:VCPKG_ROOT = "C:/path/to/vcpkg"
 $env:PATH = "$env:VCPKG_ROOT;$env:PATH"
