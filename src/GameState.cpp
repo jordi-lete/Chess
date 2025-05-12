@@ -13,6 +13,7 @@ GameState::GameState()
 	m_isCapture = false;
 	m_isCheck = false;
 	m_isCastling = false;
+	m_evaluation = 0;
 
 }
 
