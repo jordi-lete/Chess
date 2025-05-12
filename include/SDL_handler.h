@@ -49,7 +49,7 @@ private:
 
 	void playSound(const Sound& sound);
 
-	void renderBoard();
+	void renderBoard(const GameState& game);
 
 	void renderPiece(SDL_Texture* piece, int file, int rank);
 

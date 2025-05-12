@@ -96,5 +96,6 @@ public:
 	bool getIsCheck();
 	bool getIsCapture();
 	bool getIsCastling();
+	int getEvaluation() const;
 
 };

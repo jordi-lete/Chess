@@ -13,6 +13,7 @@ GameState::GameState()
 	m_isCapture = false;
 	m_isCheck = false;
 	m_isCastling = false;
+	m_evaluation = 0;
 
 }
 
@@ -527,4 +528,9 @@ bool GameState::getIsCapture()
 bool GameState::getIsCastling()
 {
 	return m_isCastling;
+}
+
+int GameState::getEvaluation() const
+{
+	return m_evaluation;
 }

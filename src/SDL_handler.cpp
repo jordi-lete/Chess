@@ -1,4 +1,5 @@
 #include "SDL_handler.h"
+#include <iostream>
 
 //Constructor
 SDL_handler::SDL_handler()
@@ -221,17 +222,55 @@ void SDL_handler::playMoveSound(bool isCapture, bool isCheck)
 	}
 }
 
-void SDL_handler::renderBoard()
+void SDL_handler::renderBoard(const GameState& game)
 {
 
 	bool white = true; //First square rendered (top left) is white
+
+	int evaluation = game.getEvaluation();
+	double splitFraction = 4 - evaluation / 500.0; // Negative evaluation means black winning so we want the split to be lower (row rank is higher)
+	int splitRow = std::floor(splitFraction);
+	std::cout << "Evaluation: " << evaluation << " Fraction: " << splitFraction << " split row: " << splitRow << std::endl;
+
+	// Square colours
+	SDL_Color whiteLightSquare = { 234, 250, 215, 255 };
+	SDL_Color whiteDarkSquare = { 67, 196, 160, 255 };
+	SDL_Color blackLightSquare = { 154, 165, 142, 255 };
+	SDL_Color blackDarkSquare = { 44, 129, 105, 255 };
 
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
 		{
+			SDL_Color squareColour;
 
-			white ? SDL_SetRenderDrawColor(renderer, 234, 250, 215, 255) : SDL_SetRenderDrawColor(renderer, 67, 196, 160, 255);
+			if (j < splitRow)
+			{
+				squareColour = white ? blackLightSquare : blackDarkSquare;
+			}
+			else if (j > splitRow)
+			{
+				squareColour = white ? whiteLightSquare : whiteDarkSquare;
+			}
+			else // we are in the split row
+			{
+				// render full square as white first
+				squareColour = white ? whiteLightSquare : whiteDarkSquare;
+				SDL_SetRenderDrawColor(renderer, squareColour.r, squareColour.g, squareColour.b, squareColour.a);
+				SDL_FRect square = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight };
+				SDL_RenderFillRect(renderer, &square);
+
+				// Now fractionally overlay the black pixels
+				squareColour = white ? blackLightSquare : blackDarkSquare;
+				SDL_SetRenderDrawColor(renderer, squareColour.r, squareColour.g, squareColour.b, squareColour.a);
+				SDL_FRect blackPart = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight * (splitFraction - splitRow) };
+				SDL_RenderFillRect(renderer, &blackPart);
+
+				white = !white;
+				continue;
+			}
+
+			SDL_SetRenderDrawColor(renderer, squareColour.r, squareColour.g, squareColour.b, squareColour.a);
 
 			SDL_FRect square = { (i * m_squareWidth) + m_xOffset, (j * m_squareHeight) + m_yOffset, m_squareWidth, m_squareHeight };
 
@@ -305,7 +344,7 @@ void SDL_handler::render(const Board& board, const GameState& game, bool holding
 	SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
 	SDL_RenderClear(renderer);
 
-	renderBoard();
+	renderBoard(game);
 		
 	for (int file = 0; file < 8; file++)
 	{
