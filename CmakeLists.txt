@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Chess)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
@@ -19,6 +19,7 @@ set(SOURCES
     src/Queen.cpp
     src/King.cpp
     src/Evaluate.cpp
+    src/Model.cpp
 )
 
 # Headers
@@ -36,6 +37,7 @@ set(HEADERS
     include/King.h
     include/Validator.h
     include/Evaluate.h
+    include/Model.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -54,7 +56,25 @@ file(COPY ${CMAKE_SOURCE_DIR}/sounds DESTINATION ${CMAKE_BINARY_DIR})
 # Find and link SDL3
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
-target_link_libraries(Chess PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/libtorch")
+find_package(Torch REQUIRED)
+target_link_libraries(Chess PRIVATE SDL3::SDL3 SDL3_image::SDL3_image "${TORCH_LIBRARIES}")
+
+# Copy PyTorch DLLs to output directory (Windows only)
+if(WIN32)
+    # Find all DLL files in LibTorch lib directory
+    file(GLOB TORCH_DLLS "C:/libtorch/lib/*.dll")
+    
+    # Copy each DLL to the output directory after build
+    foreach(DLL ${TORCH_DLLS})
+        add_custom_command(TARGET Chess POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${DLL}
+            $<TARGET_FILE_DIR:Chess>
+            COMMENT "Copying ${DLL} to output directory"
+        )
+    endforeach()
+endif()
 
 # Add a post-build command to copy assets to the output directory
 add_custom_command(TARGET Chess POST_BUILD
