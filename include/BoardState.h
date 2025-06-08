@@ -19,7 +19,7 @@ public:
 	bool blackRookQSMoved;
 	bool whiteRookQSMoved;
 
-	// From 0 - 13
+	// From 0 - 12
 	enum PieceType
 	{
 		NONE, WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING,

@@ -183,7 +183,7 @@ void SDL_handler::playSound(const Sound& sound)
 		return;
 	}
 
-	if (SDL_PutAudioStreamData(tempStream, sound.buffer, sound.length) == -1)
+	if (!SDL_PutAudioStreamData(tempStream, sound.buffer, sound.length))
 	{
 		printf("Failed to put data into stream %s\n", SDL_GetError());
 		return;
@@ -195,7 +195,7 @@ void SDL_handler::playSound(const Sound& sound)
 	int bytesRead;
 	while ((bytesRead = SDL_GetAudioStreamData(tempStream, buffer, bufferSize)) > 0)
 	{
-		if (SDL_PutAudioStreamData(m_audioStream, buffer, bytesRead) < 0)
+		if (!SDL_PutAudioStreamData(m_audioStream, buffer, bytesRead))
 		{
 			printf("Failed to put data into master stream: %s\n", SDL_GetError());
 			break;
