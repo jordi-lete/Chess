@@ -2,7 +2,7 @@
 #include "GameState.h"
 #include <torch/script.h>
 
-#define MODEL_PATH "models/traced_50EPOCH_model.pt"
+#define MODEL_PATH "models/traced_250EPOCH_model.pt"
 
 class Model
 {
@@ -11,6 +11,7 @@ private:
 	bool m_modelLoaded = false;
 
 public:
+	Model(); //Constructor
 	bool loadModel();
 	torch::Tensor boardToTensor(Board& board, GameState& game);
 	int moveToPolicyIndex(const Move& move);

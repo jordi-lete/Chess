@@ -2,6 +2,7 @@
 #include "SDL_handler.h"
 #include "BoardState.h"
 #include "GameState.h"
+#include "Model.h"
 #include <iostream>
 
 void Chess::run()
@@ -9,6 +10,7 @@ void Chess::run()
 	Board board;
 	GameState game;
 	SDL_handler handler;
+	Model model;
 
 	bool running = true;
 	Square clickedSquare;
@@ -100,6 +102,10 @@ void Chess::run()
 			if (handler.event.key.scancode == SDL_SCANCODE_LEFT)
 			{
 				game.undoLastMove(board);
+			}
+			else if (handler.event.key.scancode == SDL_SCANCODE_RIGHT)
+			{
+				model.makeAIMove(board, game);
 			}
 			break;
 		}

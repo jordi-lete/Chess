@@ -2,10 +2,19 @@
 #include <iostream>
 
 
+// Constructor
+Model::Model()
+{
+    loadModel();
+}
+
+
 bool Model::loadModel() {
     try {
-        // Deserialize the ScriptModule from a file using torch::jit::load().
-        m_module = torch::jit::load(MODEL_PATH);
+        // Deserialize the ScriptModule from a file using torch::jit::load()
+        torch::Device cpu_device(torch::kCPU);
+        m_module = torch::jit::load(MODEL_PATH, cpu_device);
+        //m_module = torch::jit::load(MODEL_PATH);
         m_module.eval(); // Set to evaluation mode
         std::cout << "Model loaded successfully\n";
         m_modelLoaded = true;
@@ -29,7 +38,7 @@ torch::Tensor Model::boardToTensor(Board& board, GameState& game) {
             Board::PieceType piece = board.getPieceAt(file, rank);
             if (piece != Board::NONE)
             {
-                tensor[piece - 1][rank][file] = 1.0;
+                tensor[piece - 1][7 - rank][file] = 1.0; // Flip board rank as our conversion is flipped (e.g. a1 = [7][0])
             }
         }
     }
@@ -77,10 +86,14 @@ torch::Tensor Model::boardToTensor(Board& board, GameState& game) {
 
 
 int Model::moveToPolicyIndex(const Move& move) {
-    int from_square = move.startRank * 8 + move.startFile;
-    int to_square = move.endRank * 8 + move.endFile;
+    // Using 7 - rank as out convention is a1 = [7][0]
+    int from_square = (7 - move.startRank) * 8 + move.startFile;
+    int to_square = (7 - move.endRank) * 8 + move.endFile;
+    std::cout << "from square: " << from_square << std::endl;
+    std::cout << "to square: " << to_square << std::endl;
 
     int base_index = from_square * 64 + to_square;
+    std::cout << "base index: " << base_index << std::endl;
 
     // Handle promotions
     if (move.isPromotion) {
@@ -181,19 +194,11 @@ bool Model::canCastle(Board& board, bool isWhite, bool kingSide)
         {
             return false;
         }
-        if (board.squares[5][rank] != board.NONE || board.squares[6][rank] != board.NONE)
-        {
-            return false;
-        }
     }
 
     else // Queenside
     {
         if (isWhite && board.whiteRookQSMoved || !isWhite && board.blackRookQSMoved)
-        {
-            return false;
-        }
-        if (board.squares[3][rank] != board.NONE || board.squares[2][rank] != board.NONE || board.squares[1][rank] != board.NONE)
         {
             return false;
         }
