@@ -64,7 +64,7 @@ torch::Tensor Model::boardToTensor(Board& board, GameState& game) {
     // En passant
     if (board.lastDoublePawnMove.file >= 0 && board.lastDoublePawnMove.rank >= 0) {
         // The en passant target square is behind the pawn that just moved
-        int epTargetRank = board.lastDoublePawnMove.rank + (game.getCurrentTurn() ? 1 : -1);
+        int epTargetRank = (7 - board.lastDoublePawnMove.rank) + (game.getCurrentTurn() ? 1 : -1);
         if (epTargetRank >= 0 && epTargetRank < 8) {
             tensor[16][epTargetRank][board.lastDoublePawnMove.file] = 1.0f;
         }
@@ -89,11 +89,8 @@ int Model::moveToPolicyIndex(const Move& move) {
     // Using 7 - rank as out convention is a1 = [7][0]
     int from_square = (7 - move.startRank) * 8 + move.startFile;
     int to_square = (7 - move.endRank) * 8 + move.endFile;
-    std::cout << "from square: " << from_square << std::endl;
-    std::cout << "to square: " << to_square << std::endl;
 
     int base_index = from_square * 64 + to_square;
-    std::cout << "base index: " << base_index << std::endl;
 
     // Handle promotions
     if (move.isPromotion) {
