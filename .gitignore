@@ -34,3 +34,7 @@ CTestTestfile.cmake
 *.exe
 *.out
 *.app
+
+#models
+*.pth
+*.pt
