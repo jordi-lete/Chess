@@ -84,5 +84,5 @@ add_custom_command(TARGET Chess POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:Chess>/sounds
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:Chess>/models
+    ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:Chess>/models
 )
