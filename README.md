@@ -2,6 +2,8 @@
 
 A chess game implemented using SDL3 and C++.
 
+![image](https://github.com/user-attachments/assets/3be4682f-a79a-484f-826a-242db1f419f4)
+
 ## Prerequisites
 
 - [CMake](https://cmake.org/download/) (version 3.10 or higher)
@@ -88,11 +90,3 @@ The executable will be located in the build directory, typically:
 - `sounds/` - Audio files
 - `CMakeLists.txt` - CMake build configuration
 - `vcpkg.json` - Dependencies manifest
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a pull request
