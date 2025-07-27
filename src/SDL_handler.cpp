@@ -30,7 +30,7 @@ bool SDL_handler::init()
 	else
 	{
 		//Create window
-		window = SDL_CreateWindow("Powerup Chess", m_boardSize, m_boardSize, SDL_WINDOW_RESIZABLE);
+		window = SDL_CreateWindow("Chess", m_boardSize, m_boardSize, SDL_WINDOW_RESIZABLE);
 		if (window == NULL)
 		{
 			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
