@@ -1,7 +1,6 @@
 #pragma once
 #include "BoardState.h"
 #include "Validator.h"
-#include "Evaluate.h"
 
 struct Promotion
 {
@@ -47,7 +46,6 @@ private:
 	bool m_isCheck;
 	bool m_isCapture;
 	bool m_isCastling;
-	int m_evaluation;
 	std::vector<Move> m_moveHistory;
 
 public:
@@ -77,7 +75,7 @@ public:
 
 	const bool showMoves() const;
 
-	const std::vector<Square>& GameState::getMoves() const;
+	const std::vector<Square>& getMoves() const;
 
 	void handleEnPassant(Board& board, Board::PieceType piece, int startFile, int startRank, int endFile, int endRank, Move* move = nullptr);
 
