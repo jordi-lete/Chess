@@ -7,9 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
 set(SOURCES
-    src/Main.cpp
-    src/RunGame.cpp
-    src/SDL_handler.cpp
     src/BoardState.cpp
     src/GameState.cpp
     src/Knight.cpp
@@ -18,14 +15,10 @@ set(SOURCES
     src/Rook.cpp
     src/Queen.cpp
     src/King.cpp
-    src/Evaluate.cpp
-    src/Model.cpp
 )
 
 # Headers
 set(HEADERS
-    include/RunGame.h
-    include/SDL_handler.h
     include/BoardState.h
     include/GameState.h
     include/Piece.h
@@ -36,8 +29,6 @@ set(HEADERS
     include/Queen.h
     include/King.h
     include/Validator.h
-    include/Evaluate.h
-    include/Model.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
