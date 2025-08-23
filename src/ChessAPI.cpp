@@ -25,7 +25,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
         int get_current_turn() {
-        return game.getCurrentTurn(); // 0 for white, 1 for black
+        return game.getCurrentTurn(); // 0 for black, 1 for white
     }
 
     EMSCRIPTEN_KEEPALIVE
