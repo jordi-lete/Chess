@@ -14,8 +14,8 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-        int try_move(int fromFile, int fromRank, int toFile, int toRank) {
-        return game.tryMakeMove(board, fromFile, fromRank, toFile, toRank);
+        int try_move(int fromFile, int fromRank, int toFile, int toRank, int promotionPiece = 0) {
+        return game.tryMakeMove(board, fromFile, fromRank, toFile, toRank, static_cast<Board::PieceType>(promotionPiece));
     }
 
     EMSCRIPTEN_KEEPALIVE

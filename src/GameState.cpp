@@ -192,12 +192,12 @@ bool GameState::tryMakeMove(Board& board, int startFile, int startRank, int endF
 		{
 			// Handle promotion first as the player may decide to cancel
 			move.promotionPiece = promotionPiece;
-			if (handlePromotion(board, move))
-			{
-				m_Moves.clear();
-				m_showMoves = false;
-				return false;
-			}
+			// if (handlePromotion(board, move))
+			// {
+			// 	m_Moves.clear();
+			// 	m_showMoves = false;
+			// 	return false;
+			// }
 
 			makeMove(board, move);
 
