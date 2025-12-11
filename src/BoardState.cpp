@@ -61,6 +61,7 @@ bool Board::getPieceColour(PieceType piece)
 	{
 		return false;
 	}
+	return false;
 
 }
 

@@ -33,4 +33,17 @@ extern "C" {
         return game.gameOver;
     }
 
+    EMSCRIPTEN_KEEPALIVE
+    int get_legal_moves(int file, int rank, int* legalMoves) {
+        game.getPossibleMoves(board, file, rank);
+        const std::vector<Square>& moves = game.getMoves();
+
+        for (int i = 0; i < moves.size(); i++) {
+            legalMoves[i * 2] = moves[i].file;
+            legalMoves[i * 2 + 1] = moves[i].rank;
+        }
+
+        return moves.size(); // number of moves
+    }
+
 }
