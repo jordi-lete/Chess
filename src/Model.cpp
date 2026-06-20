@@ -1,5 +1,6 @@
 #include "Model.h"
 #include <iostream>
+#include <filesystem>
 
 
 // Constructor
@@ -11,104 +12,219 @@ Model::Model()
 
 bool Model::loadModel() {
     try {
-        // Deserialize the ScriptModule from a file using torch::jit::load()
-        torch::Device cpu_device(torch::kCPU);
-        m_module = torch::jit::load(MODEL_PATH, cpu_device);
-        //m_module = torch::jit::load(MODEL_PATH);
-        m_module.eval(); // Set to evaluation mode
+        std::filesystem::path modelPath = std::filesystem::absolute(MODEL_PATH);
+        std::cout << "Loading model from: " << modelPath << std::endl;
+
+        std::ifstream input(modelPath, std::ios::binary);
+        if (!input) {
+            std::cerr << "Failed to open model file stream: " << modelPath << std::endl;
+            return false;
+        }
+
+        torch::Device device(torch::kCPU);
+        m_module = torch::jit::load(input, device);
+        m_module.eval();
+
         std::cout << "Model loaded successfully\n";
         m_modelLoaded = true;
         return true;
     }
     catch (const c10::Error& e) {
-        std::cerr << "Error loading the model: " << e.msg() << "\n";
-        m_modelLoaded = false;
+        std::cerr << "Torch load failed: " << e.what() << std::endl;
+        return false;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Std exception: " << e.what() << std::endl;
         return false;
     }
 }
 
 
-torch::Tensor Model::boardToTensor(Board& board, GameState& game) {
-    torch::Tensor tensor = torch::zeros({ 19, 8, 8 }, torch::kFloat32);
+torch::Tensor Model::boardToTensor(Board& board, GameState& game)
+{
+    torch::Tensor tensor = torch::zeros({ 18, 8, 8 }, torch::kFloat32);
+    bool sideToMoveWhite = game.getCurrentTurn();
+    auto getChannel = [&](Board::PieceType piece)
+        {
+            bool isWhite = piece >= Board::WHITE_PAWN && piece <= Board::WHITE_KING;
+            bool myPiece = (isWhite == sideToMoveWhite);
+            int base = myPiece ? 0 : 6;
+
+            switch (piece)
+            {
+            case Board::WHITE_PAWN:
+            case Board::BLACK_PAWN:
+                return base + 0;
+
+            case Board::WHITE_KNIGHT:
+            case Board::BLACK_KNIGHT:
+                return base + 1;
+
+            case Board::WHITE_BISHOP:
+            case Board::BLACK_BISHOP:
+                return base + 2;
+
+            case Board::WHITE_ROOK:
+            case Board::BLACK_ROOK:
+                return base + 3;
+
+            case Board::WHITE_QUEEN:
+            case Board::BLACK_QUEEN:
+                return base + 4;
+
+            case Board::WHITE_KING:
+            case Board::BLACK_KING:
+                return base + 5;
+
+            default:
+                return -1;
+            }
+        };
 
     for (int file = 0; file < 8; file++)
     {
         for (int rank = 0; rank < 8; rank++)
         {
             Board::PieceType piece = board.getPieceAt(file, rank);
-            if (piece != Board::NONE)
+
+            if (piece == Board::NONE)
+                continue;
+
+            int channel = getChannel(piece);
+
+            if (channel >= 0)
             {
-                tensor[piece - 1][7 - rank][file] = 1.0; // Flip board rank as our conversion is flipped (e.g. a1 = [7][0])
+                // Python uses tensor[channel,row,col]
+                tensor[channel][7 - rank][file] = 1.0f;
             }
         }
     }
 
+    //
     // Castling rights
-    if (canCastle(board, true, true)) // White kingside castle
+    //
+    if (sideToMoveWhite)
     {
-        tensor[12] = torch::ones({ 8, 8 }, torch::kFloat32);
+        if (canCastle(board, true, true))
+            tensor[12] = 1.0f;
+
+        if (canCastle(board, true, false))
+            tensor[13] = 1.0f;
+
+        if (canCastle(board, false, true))
+            tensor[14] = 1.0f;
+
+        if (canCastle(board, false, false))
+            tensor[15] = 1.0f;
     }
-    if (canCastle(board, true, false)) // White queenside castle
+    else
     {
-        tensor[13] = torch::ones({ 8, 8 }, torch::kFloat32);
+        if (canCastle(board, false, true))
+            tensor[12] = 1.0f;
+
+        if (canCastle(board, false, false))
+            tensor[13] = 1.0f;
+
+        if (canCastle(board, true, true))
+            tensor[14] = 1.0f;
+
+        if (canCastle(board, true, false))
+            tensor[15] = 1.0f;
     }
-    if (canCastle(board, false, true)) // Black kingside castle
+
+    //
+    // En-passant
+    //
+    if (board.lastDoublePawnMove.file >= 0 && board.lastDoublePawnMove.rank >= 0)
     {
-        tensor[14] = torch::ones({ 8, 8 }, torch::kFloat32);
-    }
-    if (canCastle(board, false, false)) // Black queenside castle
-    {
-        tensor[15] = torch::ones({ 8, 8 }, torch::kFloat32);
-    }
-    
-    // En passant
-    if (board.lastDoublePawnMove.file >= 0 && board.lastDoublePawnMove.rank >= 0) {
-        // The en passant target square is behind the pawn that just moved
-        int epTargetRank = (7 - board.lastDoublePawnMove.rank) + (game.getCurrentTurn() ? 1 : -1);
-        if (epTargetRank >= 0 && epTargetRank < 8) {
-            tensor[16][epTargetRank][board.lastDoublePawnMove.file] = 1.0f;
+        int epFile = board.lastDoublePawnMove.file;
+        int epRank;
+
+        if (sideToMoveWhite)
+        {
+            // Black just moved two squares
+            epRank = (7- board.lastDoublePawnMove.rank) - 1;
+        }
+        else
+        {
+            // White just moved two squares
+            epRank = (7 - board.lastDoublePawnMove.rank) + 1;
+        }
+
+        if (epRank >= 0 && epRank < 8)
+        {
+            tensor[16][epRank][epFile] = 1.0f;
         }
     }
 
-    // Current turn (white = 1, black = 0)
-    if (game.getCurrentTurn()) {
-        tensor[17] = torch::ones({ 8, 8 }, torch::kFloat32);
-    }
-
-    // Check
+    //
+    // Check indicator
+    //
     if (game.getIsCheck())
     {
-        tensor[18] = torch::ones({ 8, 8 }, torch::kFloat32);
+        tensor[17] = 1.0f;
     }
 
     return tensor;
 }
 
+int Model::promotionOffsetIndex(int fromFile, int toFile)
+{
+    int delta = toFile - fromFile;
 
-int Model::moveToPolicyIndex(const Move& move) {
+    if (delta == -1)
+        return 0; // capture left
+
+    if (delta == 0)
+        return 1; // straight
+
+    return 2;     // capture right
+}
+
+int Model::moveToPolicyIndex(const Move& move)
+{
     // Using 7 - rank as out convention is a1 = [7][0]
-    int from_square = (7 - move.startRank) * 8 + move.startFile;
-    int to_square = (7 - move.endRank) * 8 + move.endFile;
+    int fromSquare = (7 - move.startRank) * 8 + move.startFile;
+    int toSquare = (7 - move.endRank) * 8 + move.endFile;
 
-    int base_index = from_square * 64 + to_square;
-
-    // Handle promotions
-    if (move.isPromotion) {
-        if (move.promotionPiece == Board::WHITE_QUEEN || move.promotionPiece == Board::BLACK_QUEEN) {
-            return base_index; // Queen promotion uses base index
-        }
-        else if (move.promotionPiece == Board::WHITE_KNIGHT || move.promotionPiece == Board::BLACK_KNIGHT) {
-            return 4096 + from_square; // Indices 4096-4159
-        }
-        else if (move.promotionPiece == Board::WHITE_BISHOP || move.promotionPiece == Board::BLACK_BISHOP) {
-            return 4160 + from_square; // Indices 4160-4223
-        }
-        else if (move.promotionPiece == Board::WHITE_ROOK || move.promotionPiece == Board::BLACK_ROOK) {
-            return 4224 + from_square; // Indices 4224-4287
-        }
+    //
+    // Normal moves + queen promotions
+    //
+    if (!move.isPromotion || move.promotionPiece == Board::WHITE_QUEEN || move.promotionPiece == Board::BLACK_QUEEN)
+    {
+        return fromSquare * 64 + toSquare;
     }
 
-    return base_index;
+    int offset = promotionOffsetIndex(move.startFile, move.endFile);
+
+    //
+    // Knight underpromotion
+    //
+    if (move.promotionPiece == Board::WHITE_KNIGHT ||
+        move.promotionPiece == Board::BLACK_KNIGHT)
+    {
+        return 4096 + fromSquare * 3 + offset;
+    }
+
+    //
+    // Bishop underpromotion
+    //
+    if (move.promotionPiece == Board::WHITE_BISHOP ||
+        move.promotionPiece == Board::BLACK_BISHOP)
+    {
+        return 4288 + fromSquare * 3 + offset;
+    }
+
+    //
+    // Rook underpromotion
+    //
+    if (move.promotionPiece == Board::WHITE_ROOK ||
+        move.promotionPiece == Board::BLACK_ROOK)
+    {
+        return 4480 + fromSquare * 3 + offset;
+    }
+
+    return fromSquare * 64 + toSquare;
 }
 
 
@@ -121,41 +237,34 @@ Move Model::getMove(Board& board, GameState& game)
     }
 
     std::vector<Move> legalMoves = game.generateAllLegalMoves(board);
-    if (legalMoves.empty()) {
-        return Move{}; // No legal moves available
-    }
+    if (legalMoves.empty())
+        return Move{};
 
-    torch::Tensor input = boardToTensor(board, game);
-    input = input.unsqueeze(0); // Add batch dimension (1, 19, 8, 8)
-
+    torch::Tensor input = boardToTensor(board, game).unsqueeze(0);
     std::vector<torch::jit::IValue> inputs;
     inputs.push_back(input);
 
-    at::Tensor output = m_module.forward(inputs).toTensor();
-    output = output.squeeze(0); // Remove batch dimension
+    // Model returns (policy_logits, value) — must unpack as tuple
+    auto output_tuple = m_module.forward(inputs).toTuple();
+    at::Tensor policy = output_tuple->elements()[0].toTensor().squeeze(0);  // shape [4672]
+    // at::Tensor value = output_tuple->elements()[1].toTensor().squeeze(0); // scalar, if needed
 
-    // Find the highest scoring legal move
+    // Find highest scoring legal move
     float bestScore = -std::numeric_limits<float>::infinity();
-    Move bestMove;
-    bool foundValidMove = false;
+    Move bestMove = legalMoves[0];
 
-    for (const auto& move : legalMoves) {
-        int moveIndex = moveToPolicyIndex(move);
-
-        if (moveIndex < output.size(0)) {
-            float score = output[moveIndex].item<float>();
-            if (score > bestScore) {
+    for (const auto& move : legalMoves)
+    {
+        int idx = moveToPolicyIndex(move);
+        if (idx >= 0 && idx < static_cast<int>(policy.size(0)))
+        {
+            float score = policy[idx].item<float>();
+            if (score > bestScore)
+            {
                 bestScore = score;
                 bestMove = move;
-                foundValidMove = true;
             }
         }
-    }
-
-    if (!foundValidMove && !legalMoves.empty()) {
-        // Fallback to random legal move if no valid model output
-        bestMove = legalMoves[0];
-        std::cout << "Warning: Using fallback random move selection" << std::endl;
     }
 
     return bestMove;

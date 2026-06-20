@@ -2,7 +2,7 @@
 #include "GameState.h"
 #include <torch/script.h>
 
-#define MODEL_PATH "models/traced_250EPOCH_model.pt"
+#define MODEL_PATH "models/scripted_model.pt"
 
 class Model
 {
@@ -14,6 +14,7 @@ public:
 	Model(); //Constructor
 	bool loadModel();
 	torch::Tensor boardToTensor(Board& board, GameState& game);
+	int promotionOffsetIndex(int fromFile, int toFile);
 	int moveToPolicyIndex(const Move& move);
 	Move getMove(Board& board, GameState& game);
 	bool makeAIMove(Board& board, GameState& game);
