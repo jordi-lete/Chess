@@ -91,6 +91,7 @@ void GameState::unmakeMove(Board& board, const Move& move)
 	board.lastDoublePawnMove = move.ps_enPassantTarget;
 
 	m_isWhiteTurn = !m_isWhiteTurn;
+	m_isCheck = isInCheck(board);
 }
 
 bool GameState::undoLastMove(Board& board)

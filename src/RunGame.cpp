@@ -41,6 +41,7 @@ void Chess::run()
 			int width = handler.event.window.data1;
 			int height = handler.event.window.data2;
 			handler.resizeWindow(width, height);
+			break;
 		}
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
@@ -53,6 +54,10 @@ void Chess::run()
 			if (piece != board.NONE && board.getPieceColour(piece) == game.getCurrentTurn())
 			{
 				holdingPiece = true;
+			}
+			else
+			{
+				holdingPiece = false;
 			}
 			game.getPossibleMoves(board, clickedSquare.file, clickedSquare.rank);
 			break;
@@ -118,12 +123,13 @@ void Chess::run()
 			game.completePromotion(board, promoteTo);
 		}
 
-		handler.render(board, game, holdingPiece, mouseX, mouseY, clickedSquare);
 		if (game.moveMade)
 		{
 			handler.playMoveSound(game.getIsCapture(), game.getIsCheck());
 			game.moveMade = false;
 		}
+
+		handler.render(board, game, holdingPiece, mouseX, mouseY, clickedSquare);
 
 		// check for game end
 		if (game.gameOver)
