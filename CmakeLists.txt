@@ -77,3 +77,51 @@ add_custom_command(TARGET Chess POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:Chess>/models
 )
+
+# ---------------- Chess Server ----------------
+include(FetchContent)
+
+FetchContent_Declare(
+  httplib
+  GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+  GIT_TAG v0.15.3
+)
+FetchContent_MakeAvailable(httplib)
+
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+)
+FetchContent_MakeAvailable(json)
+
+set(SERVER_SOURCES
+    src/BoardState.cpp
+    src/GameState.cpp
+    src/Knight.cpp
+    src/Pawn.cpp
+    src/Bishop.cpp
+    src/Rook.cpp
+    src/Queen.cpp
+    src/King.cpp
+    src/Model.cpp
+    server/Server.cpp
+)
+
+add_executable(ChessServer ${SERVER_SOURCES})
+target_link_libraries(ChessServer PRIVATE httplib::httplib nlohmann_json::nlohmann_json "${TORCH_LIBRARIES}")
+
+if(WIN32)
+    foreach(DLL ${TORCH_DLLS})
+        add_custom_command(TARGET ChessServer POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${DLL}
+            $<TARGET_FILE_DIR:ChessServer>
+        )
+    endforeach()
+endif()
+
+add_custom_command(TARGET ChessServer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:ChessServer>/models
+)
