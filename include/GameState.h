@@ -1,7 +1,6 @@
 #pragma once
 #include "BoardState.h"
 #include "Validator.h"
-#include "Evaluate.h"
 
 struct Promotion
 {
