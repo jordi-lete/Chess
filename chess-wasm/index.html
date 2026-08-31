@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Chess WASM Test</title>
+</head>
+<body>
+  <h1>Chess Test</h1>
+  <button onclick="init()">Start Game</button>
+  <button onclick="tryMove(4, 6, 4, 4)">Play e2-e4</button>
+  <div id="status"></div>
+
+  <script src="chess.js"></script>
+  <script>
+    let Module = null;
+    let initialized = false;
+
+    // Load the WASM module and store it globally
+    ChessModule().then(mod => {
+      Module = mod;
+      console.log("WASM loaded and ready.");
+    });
+
+    function init() {
+      if (!Module || !Module._init_game) {
+        console.warn("WASM module not loaded yet.");
+        return;
+      }
+
+      if (!initialized) {
+        Module._init_game();
+        console.log("Game started.");
+        const turn = Module._get_current_turn();
+        console.log("Turn:", turn === 1 ? "white" : "black");
+        initialized = true;
+      }
+    }
+
+    function tryMove(f1, r1, f2, r2) {
+      if (!initialized || !Module) {
+        console.warn("Game not started yet.");
+        return;
+      }
+
+      const success = Module._try_move(f1, r1, f2, r2);
+      document.getElementById("status").textContent =
+        success ? "Move played" : "Invalid move";
+      const turn = Module._get_current_turn();
+      console.log("Turn now:", turn === 1 ? "white" : "black");
+    }
+  </script>
+</body>
+</html>

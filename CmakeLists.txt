@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(Chess)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Source files
 set(SOURCES
-    src/Main.cpp
-    src/RunGame.cpp
-    src/SDL_handler.cpp
     src/BoardState.cpp
     src/GameState.cpp
     src/Knight.cpp
@@ -18,13 +15,10 @@ set(SOURCES
     src/Rook.cpp
     src/Queen.cpp
     src/King.cpp
-    src/Evaluate.cpp
 )
 
 # Headers
 set(HEADERS
-    include/RunGame.h
-    include/SDL_handler.h
     include/BoardState.h
     include/GameState.h
     include/Piece.h
@@ -35,7 +29,6 @@ set(HEADERS
     include/Queen.h
     include/King.h
     include/Validator.h
-    include/Evaluate.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -43,18 +36,37 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Create executable (only once)
 add_executable(Chess ${SOURCES} ${HEADERS})
 
-# set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/Users/jordi/Documents/Projects/Chess/vcpkg_installed/x64-windows")
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}")
 # OR USE:
 # set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/sounds DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/models DESTINATION ${CMAKE_BINARY_DIR})
 
 # Find and link SDL3
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
-target_link_libraries(Chess PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+# Find and link libtorch (this is an absolute path as libtorch is too large to install via vcpkg)
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "C:/libtorch")
+find_package(Torch REQUIRED)
+target_link_libraries(Chess PRIVATE SDL3::SDL3 SDL3_image::SDL3_image "${TORCH_LIBRARIES}")
+
+# Copy PyTorch DLLs to output directory (Windows only)
+if(WIN32)
+    # Find all DLL files in LibTorch lib directory
+    file(GLOB TORCH_DLLS "C:/libtorch/lib/*.dll")
+    
+    # Copy each DLL to the output directory after build
+    foreach(DLL ${TORCH_DLLS})
+        add_custom_command(TARGET Chess POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${DLL}
+            $<TARGET_FILE_DIR:Chess>
+            COMMENT "Copying ${DLL} to output directory"
+        )
+    endforeach()
+endif()
 
 # Add a post-build command to copy assets to the output directory
 add_custom_command(TARGET Chess POST_BUILD
@@ -62,4 +74,6 @@ add_custom_command(TARGET Chess POST_BUILD
     ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:Chess>/assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:Chess>/sounds
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:Chess>/models
 )
